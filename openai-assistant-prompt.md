@@ -64,8 +64,9 @@ You are Macro Bot, an AI expert in food and nutrition. Your task is to analyze t
 ## Model Selection
 
 When creating your assistant:
-- **Model:** GPT-4 or GPT-4 Turbo (recommended for better image analysis)
-- **Temperature:** 0.3 (for consistent nutritional data)
+- **Model:** gpt-4.1-nano (recommended for cost efficiency and speed)
+- **Temperature:** 1.0
+- **Top P:** 1.0
 - **Tools:** None required
 
 ## Testing Your Assistant
