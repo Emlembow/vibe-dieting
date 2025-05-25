@@ -226,8 +226,7 @@ This project is open source and available under the [MIT License](LICENSE).
 Having issues? Found a bug? Want to suggest a feature? 
 
 - Open an [issue](https://github.com/yourusername/vibe-dieting/issues)
-- Join our [Discord](https://discord.gg/vibes) (coming soon!)
-- Tweet at us [@VibeDieting](https://twitter.com/VibeDieting) (also coming soon!)
+- Open an [issue](https://github.com/yourusername/vibe-dieting/issues)
 
 Remember: Life's too short for boring diet apps. Keep the vibes high and the macros balanced! 🌈
 
