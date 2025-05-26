@@ -8,6 +8,7 @@ Description: A lighthearted yet effective nutrition tracking app that uses AI to
 > Because tracking macros shouldn't feel like a chore! 🎉
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://www.vibedieting.xyz)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Emlembow/vibe-dieting)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Vibe Dieting is a lighthearted yet effective nutrition tracking app that uses AI to analyze your food through text or images. Just snap a pic or type what you ate, and let our custom OpenAI assistant figure out the calories and macros for you. No more database diving or barcode scanning – just pure vibes! ✨
