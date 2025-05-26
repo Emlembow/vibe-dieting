@@ -212,7 +212,7 @@ export default function DashboardPage() {
   // Prepare chart data
   const chartData = weeklyData.map((day) => ({
     name: day.formattedDate,
-    calories: day.calories,
+    calories: day.calories || 0,
     goal: macroGoal?.daily_calorie_goal || 0,
   }))
 
@@ -528,11 +528,10 @@ export default function DashboardPage() {
                       <Line
                         type="monotone"
                         dataKey="calories"
-                        stroke="hsl(var(--chart-1))"
+                        stroke="#3b82f6"
                         strokeWidth={2}
-                        dot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
-                        activeDot={{ r: 6, strokeWidth: 2 }}
-                        connectNulls={false}
+                        dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
