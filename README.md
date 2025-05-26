@@ -57,7 +57,7 @@ Deploy instantly to Vercel with automated database setup:
 
 - Node.js 18+ with npm/pnpm/yarn
 - [Supabase account](https://supabase.com) (free tier available)
-- [OpenAI API key](https://platform.openai.com) with multimodal model access
+- [OpenAI API key](https://platform.openai.com)
 
 ### Installation
 
