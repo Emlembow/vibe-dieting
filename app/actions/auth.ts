@@ -51,21 +51,8 @@ export async function registerUser(formData: FormData) {
       }
     }
 
-    // Create the profile
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert({
-        id: authData.user.id,
-        username: username,
-      })
-
-    if (profileError) {
-      console.error("Error creating profile:", profileError)
-      return {
-        success: false,
-        error: "Failed to create user profile",
-      }
-    }
+    // Profile will be created automatically by database trigger
+    // No need to manually insert it here
 
     return {
       success: true,
