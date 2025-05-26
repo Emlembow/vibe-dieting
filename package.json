@@ -24,10 +24,10 @@
     "node": "22.x"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
     "postbuild": "node scripts/init-database.js",
-    "start": "next start",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "build:analyze": "ANALYZE=true next build",
