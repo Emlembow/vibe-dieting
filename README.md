@@ -1,209 +1,210 @@
-<!-- 
-Website: https://www.vibedieting.xyz
-Description: A lighthearted yet effective nutrition tracking app that uses AI to analyze your food through text or images
--->
+# 🌟 Vibe Dieting - AI-Powered Nutrition Tracking
 
-# 🌟 Vibe Dieting - Your Chill Nutrition Tracking Companion
+<div align="center">
 
-> Because tracking macros shouldn't feel like a chore! 🎉
-
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://www.vibedieting.xyz)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-vibedieting.xyz-brightgreen?style=for-the-badge)](https://www.vibedieting.xyz)
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Emlembow/vibe-dieting)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 
-Vibe Dieting is a lighthearted yet effective nutrition tracking app that uses AI to analyze your food through text or images. Just snap a pic or type what you ate, and let our custom OpenAI assistant figure out the calories and macros for you. No more database diving or barcode scanning – just pure vibes! ✨
+A modern nutrition tracking app that uses AI to analyze your food through text or images. No barcode scanning, no database diving – just snap a pic or describe what you ate!
 
-🌐 **[Try it live at vibedieting.xyz](https://www.vibedieting.xyz)**
+**[✨ Try it live at vibedieting.xyz](https://www.vibedieting.xyz)**
+
+</div>
 
 ![Vibe Dieting Screenshot](screenshot.png)
 
 ## 🚀 Features
 
-- **📸 Image Recognition**: Take a photo of your meal and get instant nutrition info
-- **💬 Text Analysis**: Just type what you ate – our AI gets it
-- **📊 Macro Tracking**: Track your proteins, carbs, and fats with style
-- **🎯 Goal Setting**: Set and monitor your daily nutrition goals
-- **📈 Trends Dashboard**: Visualize your progress over time
-- **🌙 Modern UI**: Clean, responsive design that looks good on any device
+| Feature | Description |
+|---------|-------------|
+| 📸 **AI Image Analysis** | Upload photos of your meals for instant nutrition breakdown |
+| 💬 **Text Recognition** | Simply describe what you ate in natural language |
+| 📊 **Macro Tracking** | Track calories, protein, carbs, and fats with precision |
+| 🎯 **Goal Management** | Set and monitor daily nutrition targets |
+| 📈 **Progress Analytics** | Visualize trends and patterns over time |
+| 🌙 **Modern Interface** | Clean, responsive design built with shadcn/ui |
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Supabase
-- **AI**: OpenAI Assistant API
-- **UI Components**: shadcn/ui
-- **Styling**: Tailwind CSS with custom themes
-
-## 🏃‍♂️ Quick Start
-
-### Prerequisites
-
-- Node.js 18+ and pnpm (or npm/yarn)
-- [Supabase](https://supabase.com) account (free tier works!)
-- [OpenAI](https://platform.openai.com) API key
-- A sense of humor and a love for good vibes 🎵
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/yourusername/vibe-dieting.git
-cd vibe-dieting
 ```
-
-### 2. Install Dependencies
-
-```bash
-pnpm install
-# or npm install
-# or yarn install
+Frontend:  Next.js 15 + React + TypeScript + Tailwind CSS
+Backend:   Next.js API Routes + Supabase Database
+AI:        OpenAI Assistant API (GPT-4 Vision)
+UI:        shadcn/ui Components
+Auth:      Supabase Authentication
+Deploy:    Vercel + Automated Database Setup
 ```
-
-### 3. Set Up Environment Variables
-
-Copy the example environment file:
-
-```bash
-cp .env.example .env.local
-```
-
-Open `.env.local` and fill in your credentials:
-
-```env
-# OpenAI Configuration
-OPENAI_API_KEY=sk-proj-your-openai-api-key-here
-OPENAI_ASSISTANT_ID=asst_your-assistant-id-here
-
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
-```
-
-### 4. Set Up Your OpenAI Assistant
-
-1. Go to [OpenAI Platform](https://platform.openai.com/assistants)
-2. Create a new assistant with these settings:
-   - **Name**: Vibe Dieting Nutrition Assistant (or your choice)
-   - **Model**: GPT-4 or GPT-4 Turbo (recommended for image analysis)
-   - **Temperature**: 0.3 (for consistent results)
-3. **Configure Response Format** (Required!):
-   - Enable "Response format" in the assistant configuration
-   - Select `json_schema` as the format type
-   - Copy the entire contents of `openai-assistant-schema.json` and paste it into the schema field
-4. **Set Instructions**:
-   - Copy the assistant instructions from `openai-assistant-prompt.md`
-   - Paste them into the "Instructions" field
-5. Save the assistant and copy the assistant ID
-6. Add the assistant ID to your `.env.local` file
-
-> ⚠️ **Important**: The JSON schema is required! Without it, the assistant responses won't match the expected format and the app will fail to parse nutrition data.
-
-> 💡 **Files to Use**:
-> - `openai-assistant-schema.json` - The JSON schema for structured responses
-> - `openai-assistant-prompt.md` - The detailed instructions for the assistant
-
-### 5. Set Up Supabase (Automated)
-
-1. Create a new project on [Supabase](https://app.supabase.com)
-2. Copy your Supabase project URL and keys to `.env.local`
-3. Install Supabase CLI if you haven't already:
-   ```bash
-   npm install -g supabase
-   ```
-4. Set up the database with automated migrations:
-   ```bash
-   # Initialize Supabase (if not already done)
-   npm run db:init
-   
-   # Link to your Supabase project
-   npm run db:link --project-ref YOUR_PROJECT_REF
-   
-   # Push migrations to create tables and policies
-   npm run db:push
-   ```
-
-> 🎉 **No more manual SQL!** The database schema and security policies are now automatically created using Supabase migrations.
-
-**Alternative Manual Setup:**
-If you prefer manual setup, you can still run the SQL from `supabase/migrations/` files in your Supabase SQL editor.
 
 ## 🚀 One-Click Deploy
 
-Deploy directly to Vercel with automated database setup:
+Deploy instantly to Vercel with automated database setup:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Emlembow/vibe-dieting)
 
-**Post-Deploy Steps:**
-1. Set up Supabase project and add environment variables in Vercel dashboard
-2. Run database migrations: `npm run db:push`
-3. Create OpenAI Assistant using project files
-
-### 6. Run the Development Server
-
-```bash
-pnpm dev
-# or npm run dev
-# or yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) and start vibing! 🎉
-
-## 🧪 Testing
-
-Want to quickly test the app? Visit `/api/create-test-user` to create a test account with sample data:
-
-- Email: `test@example.com`
-- Password: `password123`
-
-## 📱 Usage
-
-1. **Sign Up/Login**: Create an account or use the test credentials
-2. **Set Your Goals**: Head to the Goals page to set your daily calorie and macro targets
-3. **Track Your Food**:
-   - Click "Add Food" 
-   - Either type what you ate or upload a photo
-   - Let the AI work its magic ✨
-4. **Monitor Progress**: Check your dashboard to see how you're doing
-5. **View Trends**: See your nutrition patterns over time
-
-## 🤝 Contributing
-
-We love contributions! Whether it's fixing bugs, adding features, or improving the vibes, feel free to:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🙏 Acknowledgments
-
-- [shadcn/ui](https://ui.shadcn.com/) for the beautiful components
-- [OpenAI](https://openai.com) for the amazing AI capabilities
-- [Supabase](https://supabase.com) for the backend magic
-- All the amazing contributors who help make this project better
-
-## 💌 Support
-
-Having issues? Found a bug? Want to suggest a feature? 
-
-- Open an [issue](https://github.com/yourusername/vibe-dieting/issues)
-- Open an [issue](https://github.com/yourusername/vibe-dieting/issues)
-
-Remember: Life's too short for boring diet apps. Keep the vibes high and the macros balanced! 🌈
-
-## ☕ Buy Me a Coffee
-
-If you find Vibe Dieting helpful and want to support its development, consider buying me a coffee! Your support helps keep the vibes flowing and the features coming.
-
-<a href="https://buymeacoffee.com/sm9j5qktnjv" target="_blank">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60" width="217">
-</a>
+### Post-Deploy Setup
+1. Create a [Supabase project](https://app.supabase.com) and add credentials to Vercel environment variables
+2. Run `npm run db:push` to set up database schema
+3. Create OpenAI Assistant using provided configuration files
 
 ---
 
-Made with 💜 and good vibes by the Vibe Dieting team
+## 🏗️ Local Development
+
+### Prerequisites
+
+- Node.js 18+ with npm/pnpm/yarn
+- [Supabase account](https://supabase.com) (free tier available)
+- [OpenAI API key](https://platform.openai.com) with GPT-4 access
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Emlembow/vibe-dieting.git
+   cd vibe-dieting
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or pnpm install / yarn install
+   ```
+
+3. **Environment setup**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Fill in your credentials:
+   ```env
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   
+   # OpenAI
+   OPENAI_API_KEY=sk-proj-your-api-key
+   OPENAI_ASSISTANT_ID=asst_your-assistant-id
+   ```
+
+### Database Setup (Automated)
+
+1. **Install Supabase CLI**
+   ```bash
+   npm install -g supabase
+   ```
+
+2. **Initialize and migrate**
+   ```bash
+   npm run db:init
+   npm run db:link --project-ref YOUR_PROJECT_REF
+   npm run db:push
+   ```
+
+> 🎉 **Automated migrations** handle all table creation and security policies!
+
+<details>
+<summary>📋 Manual Database Setup (Alternative)</summary>
+
+If you prefer manual setup, run the SQL from `supabase/migrations/` in your Supabase SQL editor:
+- `20240101000000_initial_schema.sql` - Tables and structure
+- `20240101000001_rls_policies.sql` - Row Level Security policies
+
+</details>
+
+### OpenAI Assistant Configuration
+
+1. Go to [OpenAI Platform](https://platform.openai.com/assistants)
+2. Create a new assistant:
+   - **Model**: GPT-4 or GPT-4 Turbo (required for image analysis)
+   - **Temperature**: 0.3
+3. **Configure JSON Schema Response Format**:
+   - Enable "Response format" → Select `json_schema`
+   - Copy contents from `openai-assistant-schema.json` into schema field
+4. **Set Instructions**:
+   - Copy from `openai-assistant-prompt.md` into Instructions field
+5. Save and add the assistant ID to `.env.local`
+
+> ⚠️ **Critical**: JSON schema configuration is required for proper response parsing
+
+### Run Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to start tracking!
+
+## 📱 Usage Guide
+
+1. **Account Setup**: Register or use test credentials (`test@example.com` / `password123`)
+2. **Set Goals**: Configure daily calorie and macro targets
+3. **Track Food**: 
+   - Upload meal photos for AI analysis
+   - Or describe food in natural language
+4. **Monitor Progress**: View dashboard and trends analytics
+
+## 🧪 Development Commands
+
+```bash
+# Development
+npm run dev              # Start development server
+npm run build           # Build for production
+npm run start           # Start production server
+
+# Database Management
+npm run db:init         # Initialize Supabase
+npm run db:link         # Link to Supabase project
+npm run db:push         # Apply migrations
+npm run db:reset        # Reset database
+
+# Code Quality
+npm run lint            # ESLint
+npm run type-check      # TypeScript check
+```
+
+## 🧪 Quick Testing
+
+Visit `/api/create-test-user` to generate test data:
+- Email: `test@example.com`
+- Password: `password123`
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
+- [OpenAI](https://openai.com) - Powerful AI capabilities  
+- [Supabase](https://supabase.com) - Backend infrastructure
+- [Vercel](https://vercel.com) - Deployment platform
+
+## 📞 Support
+
+- 🐛 **Bug reports**: [Open an issue](https://github.com/Emlembow/vibe-dieting/issues)
+- 💡 **Feature requests**: [Create a discussion](https://github.com/Emlembow/vibe-dieting/discussions)
+- 📧 **Questions**: Check existing issues or create a new one
+
+---
+
+<div align="center">
+
+**Built as a portfolio project showcasing modern web development practices**
+
+Made with 💜 and clean code
+
+</div>
