@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-console.log('🌟 Vibe Dieting - Automated Setup');
-console.log('=====================================\n');
+console.log('🌟 Vibe Dieting - Post-Install Setup');
+console.log('====================================\n');
+
+// Only run during development, not in production/Vercel
+if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+  console.log('📦 Production environment detected - skipping local setup');
+  process.exit(0);
+}
 
 // Check if .env.local exists
 const envPath = path.join(process.cwd(), '.env.local');
@@ -23,21 +28,36 @@ if (!fs.existsSync(envPath)) {
   console.log('✅ .env.local already exists');
 }
 
-console.log('\n🔧 Setup Steps:');
-console.log('1. Create a Supabase project at https://app.supabase.com');
-console.log('2. Copy your project URL and keys to .env.local');
-console.log('3. Run: npx supabase init (if not already done)');
-console.log('4. Run: npx supabase link --project-ref YOUR_PROJECT_REF');
-console.log('5. Run: npx supabase db push');
-console.log('6. Create OpenAI Assistant using files in project root');
-console.log('7. Add OpenAI keys to .env.local');
+// Check for required files
+const requiredFiles = [
+  'openai-assistant-schema.json',
+  'openai-assistant-prompt.md',
+  'supabase/migrations'
+];
 
-console.log('\n📋 Required Environment Variables:');
-console.log('- NEXT_PUBLIC_SUPABASE_URL');
-console.log('- NEXT_PUBLIC_SUPABASE_ANON_KEY');
-console.log('- SUPABASE_SERVICE_ROLE_KEY');
-console.log('- OPENAI_API_KEY');
-console.log('- OPENAI_ASSISTANT_ID');
+console.log('\n🔍 Checking project files...');
+let allFilesPresent = true;
 
-console.log('\n🚀 After setup, run: npm run dev');
-console.log('\n✨ Happy coding with good vibes!');
+requiredFiles.forEach(file => {
+  const filePath = path.join(process.cwd(), file);
+  if (fs.existsSync(filePath)) {
+    console.log(`✅ ${file}`);
+  } else {
+    console.log(`❌ ${file} - MISSING`);
+    allFilesPresent = false;
+  }
+});
+
+if (allFilesPresent) {
+  console.log('\n🎉 All required files are present!');
+} else {
+  console.log('\n⚠️  Some required files are missing');
+}
+
+console.log('\n📋 Next Steps:');
+console.log('1. Update .env.local with your Supabase and OpenAI credentials');
+console.log('2. Run: npm run db:setup (follow the prompts)');
+console.log('3. Create OpenAI Assistant using the provided files');
+console.log('4. Run: npm run dev');
+
+console.log('\n✨ Setup complete! Happy coding!');
