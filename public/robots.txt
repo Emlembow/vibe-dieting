@@ -1,0 +1,68 @@
+# https://www.robotstxt.org/robotstxt.html
+
+# Block AI crawlers to prevent high hosting costs and unauthorized AI training
+# OpenAI GPTBot
+User-agent: GPTBot
+Disallow: /
+
+# ChatGPT Plugin
+User-agent: ChatGPT-User
+Disallow: /
+
+# Common AI/ML crawlers
+User-agent: CCBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+# Google Bard
+User-agent: Google-Extended
+Disallow: /
+
+# Anthropic AI
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+# Facebook/Meta AI
+User-agent: FacebookBot
+Disallow: /
+
+# Other AI research crawlers
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+# Allow legitimate search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Default: Allow all other bots
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://vibe-dieting.vercel.app/sitemap.xml
