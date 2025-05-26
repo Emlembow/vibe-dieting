@@ -4,7 +4,16 @@
   "description": "A modern macro tracking app with AI-powered nutrition estimates using Next.js, Supabase, and OpenAI",
   "author": "Vibe Dieting Contributors",
   "license": "MIT",
-  "keywords": ["nutrition", "macro-tracking", "fitness", "ai", "nextjs", "supabase", "openai", "health"],
+  "keywords": [
+    "nutrition",
+    "macro-tracking",
+    "fitness",
+    "ai",
+    "nextjs",
+    "supabase",
+    "openai",
+    "health"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/yourusername/vibe-dieting.git"
@@ -57,6 +66,7 @@
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
     "@supabase/supabase-js": "latest",
+    "@vercel/analytics": "^1.5.0",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
