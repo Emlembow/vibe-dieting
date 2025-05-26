@@ -6,10 +6,9 @@ export async function GET() {
     // Create a server-side Supabase client
     const supabase = createServerClient()
 
-    // Get test user credentials from environment variables with defaults
-    const email = process.env.TEST_USER_EMAIL || "test@example.com"
-    const password = process.env.TEST_USER_PASSWORD || "password123"
-    const username = process.env.TEST_USER_USERNAME || "testuser"
+    const email = "test@example.com"
+    const password = "password123"
+    const username = "testuser"
 
     // First, try to delete the user if it exists (to start fresh)
     try {

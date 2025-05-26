@@ -556,413 +556,391 @@ export default function AddFoodPage() {
       {/* Only show tabs if no nutrition data is available yet */}
       {!nutritionData ? (
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 mb-6 h-auto">
-            <TabsTrigger value="recent" className="data-[state=active]:text-primary">
-              <div className="flex flex-col items-center gap-1 py-2">
-                <Clock className="h-4 w-4" />
-                <span className="text-xs">Recent</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="search" className="data-[state=active]:text-primary">
-              <div className="flex flex-col items-center gap-1 py-2">
-                <Search className="h-4 w-4" />
-                <span className="text-xs">Search</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="image" className="data-[state=active]:text-primary">
-              <div className="flex flex-col items-center gap-1 py-2">
-                <Camera className="h-4 w-4" />
-                <span className="text-xs">Image</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="manual" className="data-[state=active]:text-primary">
-              <div className="flex flex-col items-center gap-1 py-2">
-                <Utensils className="h-4 w-4" />
-                <span className="text-xs">Manual</span>
-              </div>
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="recent">Recent Foods</TabsTrigger>
+            <TabsTrigger value="search">Search Food</TabsTrigger>
+            <TabsTrigger value="image">Image Upload</TabsTrigger>
+            <TabsTrigger value="manual">Manual Entry</TabsTrigger>
           </TabsList>
 
-          <div className="min-h-[600px]">
-            <TabsContent value="recent" className="space-y-6">
-              <Card className="min-h-[500px] flex flex-col">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
-                    Smart Suggestions
-                  </CardTitle>
-                  <CardDescription>
-                    Foods you might want to add based on your eating patterns and the current time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  {isLoadingRecent ? (
-                    <div className="flex h-[400px] items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+          <TabsContent value="recent" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
+                  Smart Suggestions
+                </CardTitle>
+                <CardDescription>
+                  Foods you might want to add based on your eating patterns and the current time
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingRecent ? (
+                  <div className="flex h-[300px] items-center justify-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+                  </div>
+                ) : recentFoods.length === 0 ? (
+                  <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                    <div className="rounded-full bg-muted p-3">
+                      <Clock className="h-6 w-6 text-muted-foreground" />
                     </div>
-                  ) : recentFoods.length === 0 ? (
-                    <div className="flex h-[400px] flex-col items-center justify-center text-center">
-                      <div className="rounded-full bg-muted p-3">
-                        <Clock className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <h3 className="mt-4 text-lg font-medium">No recent foods</h3>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Start logging foods and we'll learn your patterns to make suggestions
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="relative mb-4">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          placeholder="Search your recent foods..."
-                          value={recentFoodsSearch}
-                          onChange={(e) => setRecentFoodsSearch(e.target.value)}
-                          className="pl-9"
-                        />
-                        {recentFoodsSearch && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                            onClick={() => setRecentFoodsSearch("")}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-
-                      {filteredRecentFoods.length === 0 && recentFoodsSearch ? (
-                        <div className="flex h-[400px] flex-col items-center justify-center text-center">
-                          <div className="rounded-full bg-muted p-3">
-                            <Search className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                          <h3 className="mt-4 text-lg font-medium">No matching foods</h3>
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            Try a different search term or add a new food
-                          </p>
-                          <Button variant="outline" className="mt-4" onClick={() => setActiveTab("search")}>
-                            Search for new food
-                          </Button>
-                        </div>
-                      ) : (
-                        <ScrollArea className="h-[400px] pr-4">
-                          <div className="space-y-3">
-                            {filteredRecentFoods.map((food, index) => (
-                              <div
-                                key={`${food.name}-${index}`}
-                                className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
-                              >
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="font-medium">
-                                      {recentFoodsSearch ? (
-                                        <HighlightMatch text={food.name} highlight={recentFoodsSearch} />
-                                      ) : (
-                                        food.name
-                                      )}
-                                    </div>
-                                    {food.frequency >= 3 && (
-                                      <Badge
-                                        variant="outline"
-                                        className="ml-2 bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                                      >
-                                        <Utensils className="mr-1 h-3 w-3" />
-                                        Favorite
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mb-2">
-                                    {food.description && food.description.length > 60 ? (
-                                      recentFoodsSearch ? (
-                                        <HighlightMatch
-                                          text={`${food.description.substring(0, 60)}...`}
-                                          highlight={recentFoodsSearch}
-                                        />
-                                      ) : (
-                                        `${food.description.substring(0, 60)}...`
-                                      )
-                                    ) : recentFoodsSearch ? (
-                                      <HighlightMatch text={food.description || ""} highlight={recentFoodsSearch} />
-                                    ) : (
-                                      food.description
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
-                                    <span className="flex items-center">
-                                      <Clock className="mr-1 h-3 w-3" />
-                                      Last: {food.lastEaten}
-                                    </span>
-                                    <span>Added {food.frequency}x</span>
-                                  </div>
-                                  <div className="flex flex-wrap gap-2">
-                                    <Badge
-                                      variant="outline"
-                                      className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20"
-                                    >
-                                      {food.calories} kcal
-                                    </Badge>
-                                    <Badge
-                                      variant="outline"
-                                      className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20"
-                                    >
-                                      P: {food.protein_grams}g
-                                    </Badge>
-                                    <Badge
-                                      variant="outline"
-                                      className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20"
-                                    >
-                                      C: {food.carbs_total_grams}g
-                                    </Badge>
-                                    <Badge
-                                      variant="outline"
-                                      className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20"
-                                    >
-                                      F: {food.fat_total_grams}g
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <div className="ml-4">
-                                  <Button onClick={() => handleAddRecentFood(food)} disabled={isSaving} size="sm">
-                                    {isSaving ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <>
-                                        <Plus className="mr-1 h-4 w-4" />
-                                        Add
-                                      </>
-                                    )}
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      )}
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="search" className="space-y-6">
-              <Card className="min-h-[500px] flex flex-col">
-                <CardHeader>
-                  <CardTitle>Search for Food</CardTitle>
-                  <CardDescription>Enter a food name to get nutrition information</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
+                    <h3 className="mt-4 text-lg font-medium">No recent foods</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Start logging foods and we'll learn your patterns to make suggestions
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="relative mb-4">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="e.g., Grilled chicken breast, Avocado toast..."
-                        value={foodName}
-                        onChange={(e) => setFoodName(e.target.value)}
+                        placeholder="Search your recent foods..."
+                        value={recentFoodsSearch}
+                        onChange={(e) => setRecentFoodsSearch(e.target.value)}
                         className="pl-9"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault()
-                            handleSearch()
-                          }
-                        }}
+                      />
+                      {recentFoodsSearch && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                          onClick={() => setRecentFoodsSearch("")}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    {filteredRecentFoods.length === 0 && recentFoodsSearch ? (
+                      <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                        <div className="rounded-full bg-muted p-3">
+                          <Search className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <h3 className="mt-4 text-lg font-medium">No matching foods</h3>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Try a different search term or add a new food
+                        </p>
+                        <Button variant="outline" className="mt-4" onClick={() => setActiveTab("search")}>
+                          Search for new food
+                        </Button>
+                      </div>
+                    ) : (
+                      <ScrollArea className="h-[400px] pr-4">
+                        <div className="space-y-3">
+                          {filteredRecentFoods.map((food, index) => (
+                            <div
+                              key={`${food.name}-${index}`}
+                              className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="font-medium">
+                                    {recentFoodsSearch ? (
+                                      <HighlightMatch text={food.name} highlight={recentFoodsSearch} />
+                                    ) : (
+                                      food.name
+                                    )}
+                                  </div>
+                                  {food.frequency >= 3 && (
+                                    <Badge
+                                      variant="outline"
+                                      className="ml-2 bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                                    >
+                                      <Utensils className="mr-1 h-3 w-3" />
+                                      Favorite
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-xs text-muted-foreground mb-2">
+                                  {food.description && food.description.length > 60 ? (
+                                    recentFoodsSearch ? (
+                                      <HighlightMatch
+                                        text={`${food.description.substring(0, 60)}...`}
+                                        highlight={recentFoodsSearch}
+                                      />
+                                    ) : (
+                                      `${food.description.substring(0, 60)}...`
+                                    )
+                                  ) : recentFoodsSearch ? (
+                                    <HighlightMatch text={food.description || ""} highlight={recentFoodsSearch} />
+                                  ) : (
+                                    food.description
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                                  <span className="flex items-center">
+                                    <Clock className="mr-1 h-3 w-3" />
+                                    Last: {food.lastEaten}
+                                  </span>
+                                  <span>Added {food.frequency}x</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20"
+                                  >
+                                    {food.calories} kcal
+                                  </Badge>
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20"
+                                  >
+                                    P: {food.protein_grams}g
+                                  </Badge>
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20"
+                                  >
+                                    C: {food.carbs_total_grams}g
+                                  </Badge>
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20"
+                                  >
+                                    F: {food.fat_total_grams}g
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="ml-4">
+                                <Button onClick={() => handleAddRecentFood(food)} disabled={isSaving} size="sm">
+                                  {isSaving ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Plus className="mr-1 h-4 w-4" />
+                                      Add
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="search" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Search for Food</CardTitle>
+                <CardDescription>Enter a food name to get nutrition information</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="e.g., Grilled chicken breast, Avocado toast..."
+                      value={foodName}
+                      onChange={(e) => setFoodName(e.target.value)}
+                      className="pl-9"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          handleSearch()
+                        }
+                      }}
+                    />
+                  </div>
+                  <Button onClick={handleSearch} disabled={isSearching}>
+                    {isSearching ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Searching...
+                      </>
+                    ) : (
+                      "Search"
+                    )}
+                  </Button>
+                </div>
+
+                {error && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="image" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Food Image</CardTitle>
+                <CardDescription>Take a photo or upload an image of your food for analysis</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {imagePreview ? (
+                    <div className="relative">
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-dashed">
+                        <Image
+                          src={imagePreview || "/placeholder.svg"}
+                          alt="Food preview"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute right-2 top-2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+                        onClick={clearImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="rounded-full bg-muted p-3 mb-4">
+                        <Camera className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium">Upload an image</h3>
+                      <p className="mt-2 text-sm text-muted-foreground max-w-xs">
+                        Take a photo or upload an image of your food for AI analysis
+                      </p>
+                      <Button variant="secondary" className="mt-4">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Choose Image
+                      </Button>
+                      <input
+                        id="image-upload"
+                        ref={fileInputRef}
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageUpload}
                       />
                     </div>
-                    <Button onClick={handleSearch} disabled={isSearching}>
-                      {isSearching ? (
+                  )}
+
+                  {imagePreview && (
+                    <Button onClick={analyzeImage} disabled={isUploading} className="w-full">
+                      {isUploading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Searching...
+                          Analyzing...
                         </>
                       ) : (
-                        "Search"
+                        <>
+                          <Camera className="mr-2 h-4 w-4" />
+                          Analyze Food Image
+                        </>
                       )}
                     </Button>
-                  </div>
+                  )}
 
                   {error && (
-                    <Alert variant="destructive" className="mt-4">
+                    <Alert variant="destructive">
                       <AlertTitle>Error</AlertTitle>
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                  {!isSearching && !error && (
-                    <div className="flex h-[400px] flex-col items-center justify-center text-center mt-8">
-                      <div className="rounded-full bg-muted p-3 mb-4">
-                        <Utensils className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <h3 className="text-lg font-medium">Search for food</h3>
-                      <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                        Enter a food name to get detailed nutrition information. You can search for specific foods,
-                        meals, or ingredients.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="image" className="space-y-6">
-              <Card className="min-h-[500px] flex flex-col">
-                <CardHeader>
-                  <CardTitle>Upload Food Image</CardTitle>
-                  <CardDescription>Take a photo or upload an image of your food for analysis</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="space-y-4">
-                    {imagePreview ? (
-                      <div className="relative">
-                        <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-dashed">
-                          <Image
-                            src={imagePreview || "/placeholder.svg"}
-                            alt="Food preview"
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="absolute right-2 top-2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
-                          onClick={clearImage}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center cursor-pointer hover:bg-muted/50 transition-colors h-[400px]"
-                      >
-                        <div className="rounded-full bg-muted p-3 mb-4">
-                          <Camera className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-lg font-medium">Upload an image</h3>
-                        <p className="mt-2 text-sm text-muted-foreground max-w-xs">
-                          Take a photo or upload an image of your food for AI analysis
-                        </p>
-                        <Button variant="secondary" className="mt-4">
-                          <Upload className="mr-2 h-4 w-4" />
-                          Choose Image
-                        </Button>
-                        <input
-                          id="image-upload"
-                          ref={fileInputRef}
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                        />
-                      </div>
-                    )}
-
-                    {imagePreview && (
-                      <Button onClick={analyzeImage} disabled={isUploading} className="w-full">
-                        {isUploading ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Analyzing...
-                          </>
-                        ) : (
-                          <>
-                            <Camera className="mr-2 h-4 w-4" />
-                            Analyze Food Image
-                          </>
-                        )}
-                      </Button>
-                    )}
-
-                    {error && (
-                      <Alert variant="destructive">
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
+          <TabsContent value="manual" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Manual Entry</CardTitle>
+                <CardDescription>Enter nutrition information manually</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-name">Food Name</Label>
+                    <Input
+                      id="manual-name"
+                      value={manualEntry.name}
+                      onChange={(e) => setManualEntry({ ...manualEntry, name: e.target.value })}
+                      placeholder="e.g., Grilled chicken breast"
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
-            <TabsContent value="manual" className="space-y-6">
-              <Card className="min-h-[500px] flex flex-col">
-                <CardHeader>
-                  <CardTitle>Manual Entry</CardTitle>
-                  <CardDescription>Enter nutrition information manually</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="manual-name">Food Name</Label>
-                      <Input
-                        id="manual-name"
-                        value={manualEntry.name}
-                        onChange={(e) => setManualEntry({ ...manualEntry, name: e.target.value })}
-                        placeholder="e.g., Grilled chicken breast"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-calories">Calories</Label>
+                    <Input
+                      id="manual-calories"
+                      type="number"
+                      value={manualEntry.calories}
+                      onChange={(e) => setManualEntry({ ...manualEntry, calories: Number(e.target.value) })}
+                    />
+                  </div>
 
+                  <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="manual-calories">Calories</Label>
+                      <Label htmlFor="manual-protein">Protein (g)</Label>
                       <Input
-                        id="manual-calories"
+                        id="manual-protein"
                         type="number"
-                        value={manualEntry.calories}
-                        onChange={(e) => setManualEntry({ ...manualEntry, calories: Number(e.target.value) })}
+                        value={manualEntry.protein}
+                        onChange={(e) => setManualEntry({ ...manualEntry, protein: Number(e.target.value) })}
                       />
                     </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="manual-protein">Protein (g)</Label>
-                        <Input
-                          id="manual-protein"
-                          type="number"
-                          value={manualEntry.protein}
-                          onChange={(e) => setManualEntry({ ...manualEntry, protein: Number(e.target.value) })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="manual-carbs">Carbs (g)</Label>
-                        <Input
-                          id="manual-carbs"
-                          type="number"
-                          value={manualEntry.carbs}
-                          onChange={(e) => setManualEntry({ ...manualEntry, carbs: Number(e.target.value) })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="manual-fat">Fat (g)</Label>
-                        <Input
-                          id="manual-fat"
-                          type="number"
-                          value={manualEntry.fat}
-                          onChange={(e) => setManualEntry({ ...manualEntry, fat: Number(e.target.value) })}
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="manual-carbs">Carbs (g)</Label>
+                      <Input
+                        id="manual-carbs"
+                        type="number"
+                        value={manualEntry.carbs}
+                        onChange={(e) => setManualEntry({ ...manualEntry, carbs: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="manual-fat">Fat (g)</Label>
+                      <Input
+                        id="manual-fat"
+                        type="number"
+                        value={manualEntry.fat}
+                        onChange={(e) => setManualEntry({ ...manualEntry, fat: Number(e.target.value) })}
+                      />
                     </div>
                   </div>
-                </CardContent>
-                <CardFooter>
-                  <Button onClick={handleManualSave} disabled={isSaving} className="w-full">
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add to Food Log
-                      </>
-                    )}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-          </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleManualSave} disabled={isSaving} className="w-full">
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add to Food Log
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
         </Tabs>
       ) : null}
+
+      {!nutritionData && !isSearching && !isUploading && !error && activeTab === "search" && (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="rounded-full bg-muted p-3 mb-4">
+            <Utensils className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-medium">Search for food</h3>
+          <p className="mt-2 text-sm text-muted-foreground max-w-md">
+            Enter a food name to get detailed nutrition information. You can search for specific foods, meals, or
+            ingredients.
+          </p>
+        </div>
+      )}
 
       {nutritionData && (
         <Card className="mt-6">

@@ -1,92 +1,23 @@
 import type { NutritionResponse } from "@/types/database"
 import { NextResponse } from "next/server"
-import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
-import { nutritionImageRequestSchema } from "@/lib/validations"
-import { headers } from "next/headers"
-import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth"
 
-// Type for the OpenAI Assistant response format
-interface AssistantResponse {
-  foodDetails: {
-    name: string
-    description: string
-  }
-  macronutrients: {
-    calories: number
-    proteinGrams: number
-    carbohydrates: {
-      totalGrams: number
-      fiberGrams: number
-      sugarGrams: number
-    }
-    fat: {
-      totalGrams: number
-      saturatedGrams: number
-    }
-  }
-}
+// Assistant ID from your workspace
+const ASSISTANT_ID = "asst_WHhkCaZpesjEEX8CDNQUz0fX"
 
-// Transform assistant response to our database format
-function transformAssistantResponse(assistantData: AssistantResponse): NutritionResponse {
-  return {
-    name: assistantData.foodDetails.name,
-    description: assistantData.foodDetails.description,
-    calories: assistantData.macronutrients.calories,
-    protein_grams: assistantData.macronutrients.proteinGrams,
-    carbs_total_grams: assistantData.macronutrients.carbohydrates.totalGrams,
-    carbs_fiber_grams: assistantData.macronutrients.carbohydrates.fiberGrams,
-    carbs_sugar_grams: assistantData.macronutrients.carbohydrates.sugarGrams,
-    fat_total_grams: assistantData.macronutrients.fat.totalGrams,
-    fat_saturated_grams: assistantData.macronutrients.fat.saturatedGrams,
-  }
-}
-
-// Get configuration from environment variables
-const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-
-// Validate required environment variables
-if (!ASSISTANT_ID) {
-  throw new Error("OPENAI_ASSISTANT_ID environment variable is required")
-}
-if (!OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY environment variable is required")
-}
+// Get API key from environment variable
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "sk-your-api-key-here"
 
 export async function POST(request: Request) {
   try {
-    // Check authentication
-    const user = await getAuthenticatedUser()
-    if (!user) {
-      return unauthorizedResponse()
-    }
-
-    // Rate limiting check - use user ID for authenticated users
-    const headersList = await headers()
-    const identifier = user.id || headersList.get("x-forwarded-for") || "anonymous"
-    const { success } = await checkRateLimit(identifier)
-    
-    if (!success) {
-      return rateLimitResponse()
-    }
-
     // Parse the multipart form data to get the image
     const formData = await request.formData()
     const foodImage = formData.get("foodImage") as File | null
 
-    // Validate the image
-    const validationResult = nutritionImageRequestSchema.safeParse({ foodImage })
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { 
-          error: "Invalid image",
-          details: validationResult.error.errors.map(e => e.message).join(", ")
-        }, 
-        { status: 400 }
-      )
+    if (!foodImage) {
+      return NextResponse.json({ error: "Food image is required" }, { status: 400 })
     }
 
-    console.log("Request received with food image:", foodImage!.name, "Size:", foodImage!.size)
+    console.log("Request received with food image:", foodImage.name, "Size:", foodImage.size)
 
     // Common headers for all requests
     const headers = {
@@ -279,8 +210,7 @@ export async function POST(request: Request) {
       // Clean up the JSON text if needed
       jsonText = jsonText.replace(/^```json\s*/, "").replace(/\s*```$/, "")
 
-      const assistantData: AssistantResponse = JSON.parse(jsonText)
-      const nutritionData = transformAssistantResponse(assistantData)
+      const nutritionData: NutritionResponse = JSON.parse(jsonText)
 
       // Clean up - delete the file from OpenAI
       try {
