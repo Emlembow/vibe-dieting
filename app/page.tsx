@@ -18,7 +18,7 @@ export default function Home() {
       supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
-      }).then(({ error }) => {
+      }).then(({ error }: { error: any }) => {
         if (error) {
           console.error("Error setting session:", error)
           router.push("/login?error=verification_failed")
