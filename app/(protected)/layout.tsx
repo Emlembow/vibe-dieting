@@ -7,6 +7,7 @@ import { useEffect } from "react"
 import { MobileNav } from "@/components/mobile-nav"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export default function ProtectedLayout({
   children,
@@ -26,7 +27,7 @@ export default function ProtectedLayout({
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+        <LoadingSpinner size="lg" />
       </div>
     )
   }

@@ -29,6 +29,7 @@ import {
   Sparkles,
   Pencil,
 } from "lucide-react"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
@@ -612,7 +613,7 @@ export default function AddFoodPage() {
               <CardContent>
                 {isLoadingRecent ? (
                   <div className="flex h-[300px] items-center justify-center">
-                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+                    <LoadingSpinner size="md" />
                   </div>
                 ) : recentFoods.length === 0 ? (
                   <div className="flex h-[300px] flex-col items-center justify-center text-center">
