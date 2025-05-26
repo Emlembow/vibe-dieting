@@ -2,16 +2,24 @@ import type { NutritionResponse } from "@/types/database"
 import { NextRequest, NextResponse } from "next/server"
 import { authenticateRequest, unauthorizedResponse } from "@/lib/auth-api"
 
-// Get configuration from environment variables
-const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-
 export async function POST(request: NextRequest) {
   try {
+    // Get configuration from environment variables
+    const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY
+
     // Validate required environment variables
     if (!OPENAI_API_KEY || !ASSISTANT_ID) {
       return NextResponse.json(
-        { error: "Missing required environment variables: OPENAI_API_KEY and OPENAI_ASSISTANT_ID" },
+        { 
+          error: "Missing required environment variables: OPENAI_API_KEY and OPENAI_ASSISTANT_ID",
+          debug: {
+            hasApiKey: !!OPENAI_API_KEY,
+            hasAssistantId: !!ASSISTANT_ID,
+            apiKeyLength: OPENAI_API_KEY ? OPENAI_API_KEY.length : 0,
+            assistantIdLength: ASSISTANT_ID ? ASSISTANT_ID.length : 0
+          }
+        },
         { status: 500 }
       )
     }

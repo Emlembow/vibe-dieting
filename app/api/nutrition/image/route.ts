@@ -2,12 +2,12 @@ import type { NutritionResponse } from "@/types/database"
 import { NextRequest, NextResponse } from "next/server"
 import { authenticateRequest, unauthorizedResponse } from "@/lib/auth-api"
 
-// Get configuration from environment variables
-const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-
 export async function POST(request: NextRequest) {
   try {
+    // Get configuration from environment variables
+    const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY
+
     // Validate required environment variables
     if (!OPENAI_API_KEY || !ASSISTANT_ID) {
       return NextResponse.json(
