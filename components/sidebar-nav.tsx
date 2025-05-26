@@ -48,8 +48,8 @@ export function SidebarNav() {
   ]
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b border-border/10 bg-background">
+    <Sidebar className="border-r border-border/50">
+      <SidebarHeader className="border-b border-border/50">
         <div className="px-2 py-4">
           <Link href="/dashboard" className="flex items-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-orange-400 mr-3">
@@ -70,11 +70,8 @@ export function SidebarNav() {
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton asChild isActive={isActive}>
-                  <Link
-                    href={item.href}
-                    className={`flex items-center ${isActive ? "text-primary bg-muted" : "text-foreground hover:bg-muted/50"}`}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
+                  <Link href={item.href}>
+                    <Icon className="h-4 w-4" />
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
@@ -83,11 +80,11 @@ export function SidebarNav() {
           })}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="border-t border-border/10 bg-background">
+      <SidebarFooter className="border-t border-border/50">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleSignOut} className="flex items-center text-foreground hover:bg-muted/50">
-              <LogOut className="mr-2 h-4 w-4" />
+            <SidebarMenuButton onClick={handleSignOut}>
+              <LogOut className="h-4 w-4" />
               <span>Sign Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
