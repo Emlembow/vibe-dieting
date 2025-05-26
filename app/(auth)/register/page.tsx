@@ -9,25 +9,42 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { registerUser } from "@/app/actions/auth"
-import { useFormState } from "react-dom"
 import { IceCream, CheckCircle, Loader2 } from "lucide-react"
-
-const initialState = {
-  success: false,
-  error: undefined,
-  message: undefined,
-}
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
+  const [state, setState] = useState<{
+    success: boolean
+    error?: string
+    message?: string
+  }>({
+    success: false,
+  })
   const router = useRouter()
-  const [state, formAction] = useFormState(async (prevState: any, formData: FormData) => {
-    setIsLoading(true)
-    const result = await registerUser(formData)
-    setIsLoading(false)
 
-    return result
-  }, initialState)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    console.log("Form submitted")
+    setIsLoading(true)
+    setState({ success: false }) // Reset state
+    
+    const formData = new FormData(e.currentTarget)
+    
+    try {
+      console.log("Calling registerUser...")
+      const result = await registerUser(formData)
+      console.log("Registration result:", result)
+      setState(result)
+    } catch (error) {
+      console.error("Registration error:", error)
+      setState({
+        success: false,
+        error: "An unexpected error occurred. Please try again.",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
@@ -44,7 +61,7 @@ export default function RegisterPage() {
           <CardTitle className="text-2xl font-bold">Join Vibe Dieting</CardTitle>
           <CardDescription>Enter your information to create an account</CardDescription>
         </CardHeader>
-        <form action={formAction}>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {state.error && (
               <Alert variant="destructive">
