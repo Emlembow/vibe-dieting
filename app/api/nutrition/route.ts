@@ -2,14 +2,20 @@ import type { NutritionResponse } from "@/types/database"
 import { NextRequest, NextResponse } from "next/server"
 import { authenticateRequest, unauthorizedResponse } from "@/lib/auth-api"
 
-// Assistant ID from your workspace
-const ASSISTANT_ID = "asst_WHhkCaZpesjEEX8CDNQUz0fX"
-
-// Hard-coded API key for development (will be replaced by environment variable in production)
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "sk-your-api-key-here"
+// Get configuration from environment variables
+const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate required environment variables
+    if (!OPENAI_API_KEY || !ASSISTANT_ID) {
+      return NextResponse.json(
+        { error: "Missing required environment variables: OPENAI_API_KEY and OPENAI_ASSISTANT_ID" },
+        { status: 500 }
+      )
+    }
+
     // Authenticate the request
     const { user, error } = await authenticateRequest(request)
     
@@ -21,14 +27,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const { foodName } = body || {}
 
-    console.log("Request received for food:", foodName, "by user:", user.id)
 
     if (!foodName) {
       return NextResponse.json({ error: "Food name is required" }, { status: 400 })
     }
 
     // Use the environment variable for the API key
-    console.log("Using API key from environment variable")
 
     // Common headers for all requests
     const headers = {
@@ -38,7 +42,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Create a thread
-    console.log("Creating thread...")
     const threadResponse = await fetch("https://api.openai.com/v1/threads", {
       method: "POST",
       headers,
@@ -53,10 +56,8 @@ export async function POST(request: NextRequest) {
 
     const threadData = await threadResponse.json()
     const threadId = threadData.id
-    console.log("Thread created:", threadId)
 
     // 2. Add a message to the thread
-    console.log("Adding message to thread...")
     const messageResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       method: "POST",
       headers,
@@ -72,10 +73,8 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to add message: ${errorData.error?.message || "Unknown error"}`)
     }
 
-    console.log("Message added to thread")
 
     // 3. Run the assistant
-    console.log("Running assistant...")
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
       method: "POST",
       headers,
@@ -92,10 +91,8 @@ export async function POST(request: NextRequest) {
 
     const runData = await runResponse.json()
     const runId = runData.id
-    console.log("Run created:", runId)
 
     // 4. Poll for the run to complete
-    console.log("Polling for run completion...")
     let runStatus = "queued"
     let attempts = 0
     const maxAttempts = 30 // 30 seconds timeout
@@ -116,7 +113,6 @@ export async function POST(request: NextRequest) {
 
       const statusData = await statusResponse.json()
       runStatus = statusData.status
-      console.log(`Run status (attempt ${attempts + 1}): ${runStatus}`)
       attempts++
 
       if (runStatus === "failed" || runStatus === "cancelled" || runStatus === "expired") {
@@ -129,7 +125,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Get the messages from the thread
-    console.log("Retrieving messages...")
     const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       method: "GET",
       headers,
@@ -142,13 +137,11 @@ export async function POST(request: NextRequest) {
     }
 
     const messagesData = await messagesResponse.json()
-    console.log(`Retrieved ${messagesData.data.length} messages`)
 
     // Find the assistant's response
     const assistantMessages = messagesData.data.filter((message) => message.role === "assistant")
 
     if (assistantMessages.length === 0) {
-      console.error("No assistant messages found")
       throw new Error("No response from assistant")
     }
 
@@ -156,18 +149,15 @@ export async function POST(request: NextRequest) {
     const responseContent = assistantMessages[0].content[0]
 
     if (responseContent.type !== "text") {
-      console.error(`Unexpected response type: ${responseContent.type}`)
       throw new Error("Unexpected response format")
     }
 
-    console.log("Assistant response:", responseContent.text.value)
 
     // Parse the JSON from the text response
     try {
       const nutritionData: NutritionResponse = JSON.parse(responseContent.text.value)
       return NextResponse.json(nutritionData)
     } catch (parseError) {
-      console.error("Error parsing JSON response:", parseError)
       throw new Error("Failed to parse nutrition data")
     }
   } catch (error: any) {

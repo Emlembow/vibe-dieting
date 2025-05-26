@@ -1,12 +1,24 @@
 {
-  "name": "my-v0-project",
-  "version": "0.1.0",
+  "name": "vibe-dieting",
+  "version": "1.0.0",
+  "description": "A modern macro tracking app with AI-powered nutrition estimates using Next.js, Supabase, and OpenAI",
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "keywords": ["nutrition", "macro-tracking", "fitness", "ai", "nextjs", "supabase", "openai", "health"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/vibe-dieting.git"
+  },
+  "homepage": "https://github.com/yourusername/vibe-dieting#readme",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "build:analyze": "ANALYZE=true next build",
+    "postinstall": "echo '✅ Installation complete! Run `npm run dev` to start the development server.'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

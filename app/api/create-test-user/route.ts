@@ -23,10 +23,8 @@ export async function GET() {
 
       if (existingUser) {
         await supabase.auth.admin.deleteUser(existingUser.id)
-        console.log("Deleted existing user:", existingUser.id)
       }
     } catch (error) {
-      console.log("No existing user found or error deleting:", error)
     }
 
     // Create a new user with the admin API
@@ -41,7 +39,6 @@ export async function GET() {
     }
 
     const userId = data.user.id
-    console.log("Created user with ID:", userId)
 
     // Create a profile for the user using the server client (bypasses RLS)
     const { error: profileError } = await supabase.from("profiles").insert({
@@ -51,7 +48,6 @@ export async function GET() {
     })
 
     if (profileError) {
-      console.error("Error creating profile:", profileError)
     }
 
     // Add macro goals
@@ -64,7 +60,6 @@ export async function GET() {
     })
 
     if (goalsError) {
-      console.error("Error creating macro goals:", goalsError)
     }
 
     // Add food entries
@@ -99,7 +94,6 @@ export async function GET() {
     ])
 
     if (entriesError) {
-      console.error("Error creating food entries:", entriesError)
     }
 
     return NextResponse.json({

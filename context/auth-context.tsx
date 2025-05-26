@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } = await supabase.auth.getSession()
 
       if (error) {
-        console.error("Error getting session:", error)
+        // Error getting session
       }
 
       setSession(session)
@@ -41,7 +41,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event)
       setSession(session)
       setUser(session?.user ?? null)
       setIsLoading(false)
@@ -59,14 +58,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router])
 
   const signIn = async (email: string, password: string) => {
-    console.log("Attempting to sign in with:", email)
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
     if (error) {
-      console.error("Sign in error:", error)
 
       // If the error is about email confirmation, provide a more helpful message
       if (error.message.includes("Email not confirmed")) {
@@ -78,7 +75,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error
     }
 
-    console.log("Sign in successful:", data)
   }
 
   const signUp = async (email: string, password: string, username: string) => {
@@ -104,7 +100,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (profileError) {
-        console.error("Error creating profile:", profileError)
         // Don't throw here, as the user is already created
       }
     }

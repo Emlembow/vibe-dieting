@@ -1,13 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // Enable strict mode for better performance and reliability
+  reactStrictMode: true,
+  
+  // Optimize images for better performance
   images: {
-    unoptimized: true,
+    domains: [],
+    formats: ['image/webp', 'image/avif'],
+  },
+  
+  // Enable experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
   },
 }
 

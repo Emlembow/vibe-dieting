@@ -2,14 +2,20 @@ import type { NutritionResponse } from "@/types/database"
 import { NextRequest, NextResponse } from "next/server"
 import { authenticateRequest, unauthorizedResponse } from "@/lib/auth-api"
 
-// Assistant ID from your workspace
-const ASSISTANT_ID = "asst_WHhkCaZpesjEEX8CDNQUz0fX"
-
-// Get API key from environment variable
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "sk-your-api-key-here"
+// Get configuration from environment variables
+const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate required environment variables
+    if (!OPENAI_API_KEY || !ASSISTANT_ID) {
+      return NextResponse.json(
+        { error: "Missing required environment variables: OPENAI_API_KEY and OPENAI_ASSISTANT_ID" },
+        { status: 500 }
+      )
+    }
+
     // Authenticate the request
     const { user, error } = await authenticateRequest(request)
     
@@ -25,7 +31,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Food image is required" }, { status: 400 })
     }
 
-    console.log("Request received with food image:", foodImage.name, "Size:", foodImage.size, "by user:", user.id)
 
     // Common headers for all requests
     const headers = {
@@ -34,7 +39,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Create a thread
-    console.log("Creating thread...")
     const threadResponse = await fetch("https://api.openai.com/v1/threads", {
       method: "POST",
       headers: {
@@ -52,10 +56,8 @@ export async function POST(request: NextRequest) {
 
     const threadData = await threadResponse.json()
     const threadId = threadData.id
-    console.log("Thread created:", threadId)
 
     // 2. First, upload the file to OpenAI with purpose: "vision"
-    console.log("Uploading file to OpenAI...")
     const imageArrayBuffer = await foodImage.arrayBuffer()
     const imageBuffer = Buffer.from(imageArrayBuffer)
 
@@ -83,10 +85,8 @@ export async function POST(request: NextRequest) {
 
     const fileData = await fileUploadResponse.json()
     const fileId = fileData.id
-    console.log("File uploaded with ID:", fileId)
 
     // 3. Add a message with the image in the content array
-    console.log("Adding message to thread...")
     const messageResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       method: "POST",
       headers: {
@@ -114,10 +114,8 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to add message: ${errorData.error?.message || "Unknown error"}`)
     }
 
-    console.log("Message with image added to thread")
 
     // 4. Run the assistant
-    console.log("Running assistant...")
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
       method: "POST",
       headers: {
@@ -137,10 +135,8 @@ export async function POST(request: NextRequest) {
 
     const runData = await runResponse.json()
     const runId = runData.id
-    console.log("Run created:", runId)
 
     // 5. Poll for the run to complete
-    console.log("Polling for run completion...")
     let runStatus = "queued"
     let attempts = 0
     const maxAttempts = 60 // 60 seconds timeout (image processing may take longer)
@@ -161,7 +157,6 @@ export async function POST(request: NextRequest) {
 
       const statusData = await statusResponse.json()
       runStatus = statusData.status
-      console.log(`Run status (attempt ${attempts + 1}): ${runStatus}`)
       attempts++
 
       if (runStatus === "failed" || runStatus === "cancelled" || runStatus === "expired") {
@@ -174,7 +169,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Get the messages from the thread
-    console.log("Retrieving messages...")
     const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       method: "GET",
       headers,
@@ -187,13 +181,11 @@ export async function POST(request: NextRequest) {
     }
 
     const messagesData = await messagesResponse.json()
-    console.log(`Retrieved ${messagesData.data.length} messages`)
 
     // Find the assistant's response
     const assistantMessages = messagesData.data.filter((message) => message.role === "assistant")
 
     if (assistantMessages.length === 0) {
-      console.error("No assistant messages found")
       throw new Error("No response from assistant")
     }
 
@@ -201,11 +193,9 @@ export async function POST(request: NextRequest) {
     const responseContent = assistantMessages[0].content[0]
 
     if (responseContent.type !== "text") {
-      console.error(`Unexpected response type: ${responseContent.type}`)
       throw new Error("Unexpected response format")
     }
 
-    console.log("Assistant response:", responseContent.text.value)
 
     // Parse the JSON from the text response
     try {
@@ -228,15 +218,12 @@ export async function POST(request: NextRequest) {
             Authorization: `Bearer ${OPENAI_API_KEY}`,
           },
         })
-        console.log("File deleted from OpenAI")
       } catch (deleteError) {
-        console.error("Error deleting file:", deleteError)
         // Don't throw here, as we still want to return the nutrition data
       }
 
       return NextResponse.json(nutritionData)
     } catch (parseError) {
-      console.error("Error parsing JSON response:", parseError)
       throw new Error("Failed to parse nutrition data")
     }
   } catch (error: any) {
