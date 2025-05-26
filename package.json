@@ -20,6 +20,9 @@
   },
   "homepage": "https://github.com/yourusername/vibe-dieting#readme",
   "private": true,
+  "engines": {
+    "node": ">=22.16.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
