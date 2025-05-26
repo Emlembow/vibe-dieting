@@ -184,7 +184,12 @@ Contributions are welcome! Please:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is open source and available under the [MIT License](LICENSE).
+
+```
+MIT License - you are free to use, modify, and distribute this code.
+See LICENSE file for full terms.
+```
 
 ## 🙏 Acknowledgments
 
