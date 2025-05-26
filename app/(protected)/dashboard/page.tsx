@@ -529,9 +529,12 @@ export default function DashboardPage() {
                         type="monotone"
                         dataKey="calories"
                         stroke="var(--color-calories)"
-                        strokeWidth={2}
-                        dot={{ r: 4, strokeWidth: 2, fill: "white" }}
-                        activeDot={{ r: 6, strokeWidth: 2 }}
+                        strokeWidth={3}
+                        dot={{ r: 4, strokeWidth: 2, fill: "var(--color-calories)", stroke: "white" }}
+                        activeDot={{ r: 6, strokeWidth: 2, fill: "var(--color-calories)", stroke: "white" }}
+                        connectNulls={true}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </LineChart>
                   </ResponsiveContainer>
