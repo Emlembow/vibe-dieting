@@ -32,7 +32,7 @@ A modern nutrition tracking app that uses AI to analyze your food through text o
 ```
 Frontend:  Next.js 15 + React + TypeScript + Tailwind CSS
 Backend:   Next.js API Routes + Supabase Database
-AI:        OpenAI Assistant API (GPT-4 Vision)
+AI:        OpenAI Assistant API (GPT-4.1 Nano)
 UI:        shadcn/ui Components
 Auth:      Supabase Authentication
 Deploy:    Vercel + Automated Database Setup
@@ -57,7 +57,7 @@ Deploy instantly to Vercel with automated database setup:
 
 - Node.js 18+ with npm/pnpm/yarn
 - [Supabase account](https://supabase.com) (free tier available)
-- [OpenAI API key](https://platform.openai.com) with GPT-4 access
+- [OpenAI API key](https://platform.openai.com) with GPT-4.1 Nano access
 
 ### Installation
 
@@ -119,7 +119,7 @@ If you prefer manual setup, run the SQL from `supabase/migrations/` in your Supa
 
 1. Go to [OpenAI Platform](https://platform.openai.com/assistants)
 2. Create a new assistant:
-   - **Model**: GPT-4 or GPT-4 Turbo (required for image analysis)
+   - **Model**: GPT-4.1 Nano (required for image analysis)
    - **Temperature**: 0.3
 3. **Configure JSON Schema Response Format**:
    - Enable "Response format" → Select `json_schema`
