@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
     const messagesData = await messagesResponse.json()
 
     // Find the assistant's response
-    const assistantMessages = messagesData.data.filter((message) => message.role === "assistant")
+    const assistantMessages = messagesData.data.filter((message: any) => message.role === "assistant")
 
     if (assistantMessages.length === 0) {
       throw new Error("No response from assistant")
