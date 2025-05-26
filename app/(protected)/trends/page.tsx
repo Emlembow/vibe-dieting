@@ -83,7 +83,10 @@ export default function TrendsPage() {
                 selected={dateRange}
                 onSelect={(range) => {
                   if (range?.from && range?.to) {
-                    setDateRange(range)
+                    setDateRange({
+                      from: range.from,
+                      to: range.to
+                    })
                   }
                 }}
                 initialFocus
