@@ -102,76 +102,41 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 > - `openai-assistant-schema.json` - The JSON schema for structured responses
 > - `openai-assistant-prompt.md` - The detailed instructions for the assistant
 
-### 5. Set Up Supabase
+### 5. Set Up Supabase (Automated)
 
 1. Create a new project on [Supabase](https://app.supabase.com)
-2. Run the following SQL in your Supabase SQL editor:
+2. Copy your Supabase project URL and keys to `.env.local`
+3. Install Supabase CLI if you haven't already:
+   ```bash
+   npm install -g supabase
+   ```
+4. Set up the database with automated migrations:
+   ```bash
+   # Initialize Supabase (if not already done)
+   npm run db:init
+   
+   # Link to your Supabase project
+   npm run db:link --project-ref YOUR_PROJECT_REF
+   
+   # Push migrations to create tables and policies
+   npm run db:push
+   ```
 
-```sql
--- Create profiles table
-CREATE TABLE profiles (
-  id UUID REFERENCES auth.users PRIMARY KEY,
-  username TEXT UNIQUE,
-  full_name TEXT,
-  avatar_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+> 🎉 **No more manual SQL!** The database schema and security policies are now automatically created using Supabase migrations.
 
--- Create macro_goals table
-CREATE TABLE macro_goals (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users NOT NULL,
-  daily_calorie_goal INTEGER DEFAULT 2000,
-  protein_percentage INTEGER DEFAULT 30,
-  carbs_percentage INTEGER DEFAULT 40,
-  fat_percentage INTEGER DEFAULT 30,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+**Alternative Manual Setup:**
+If you prefer manual setup, you can still run the SQL from `supabase/migrations/` files in your Supabase SQL editor.
 
--- Create food_entries table
-CREATE TABLE food_entries (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users NOT NULL,
-  date DATE NOT NULL DEFAULT CURRENT_DATE,
-  name TEXT NOT NULL,
-  description TEXT,
-  calories INTEGER NOT NULL,
-  protein_grams DECIMAL(10,2) NOT NULL,
-  carbs_total_grams DECIMAL(10,2) NOT NULL,
-  carbs_fiber_grams DECIMAL(10,2) DEFAULT 0,
-  carbs_sugar_grams DECIMAL(10,2) DEFAULT 0,
-  fat_total_grams DECIMAL(10,2) NOT NULL,
-  fat_saturated_grams DECIMAL(10,2) DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+## 🚀 One-Click Deploy
 
--- Set up Row Level Security (RLS)
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE macro_goals ENABLE ROW LEVEL SECURITY;
-ALTER TABLE food_entries ENABLE ROW LEVEL SECURITY;
+Deploy directly to Vercel with automated database setup:
 
--- Create policies
-CREATE POLICY "Users can view own profile" ON profiles
-  FOR SELECT USING (auth.uid() = id);
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Emlembow/vibe-dieting)
 
-CREATE POLICY "Users can update own profile" ON profiles
-  FOR UPDATE USING (auth.uid() = id);
-
-CREATE POLICY "Users can view own goals" ON macro_goals
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can manage own goals" ON macro_goals
-  FOR ALL USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can view own entries" ON food_entries
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can manage own entries" ON food_entries
-  FOR ALL USING (auth.uid() = user_id);
-```
-
-3. Copy your Supabase project URL and keys to `.env.local`
+**Post-Deploy Steps:**
+1. Set up Supabase project and add environment variables in Vercel dashboard
+2. Run database migrations: `npm run db:push`
+3. Create OpenAI Assistant using project files
 
 ### 6. Run the Development Server
 
