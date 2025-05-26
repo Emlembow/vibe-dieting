@@ -13,6 +13,7 @@ import { getTrendData, type TrendData, type TrendSummary } from "@/app/actions/t
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/context/auth-context"
 import type { MacroGoal } from "@/types/database"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 
 export default function TrendsPage() {
   const { user } = useAuth()
@@ -56,16 +57,6 @@ export default function TrendsPage() {
     fetchTrendData()
   }, [dateRange, toast, user])
 
-  // Calculate max values for chart scaling - use actual data max with a small buffer
-  const dataMaxCalories = Math.max(...trendData.map((d) => d.calories))
-  const dataMaxProtein = Math.max(...trendData.map((d) => d.protein))
-  const dataMaxCarbs = Math.max(...trendData.map((d) => d.carbs))
-  const dataMaxFat = Math.max(...trendData.map((d) => d.fat))
-  
-  const maxCalories = Math.max(dataMaxCalories * 1.1, 100) // Add 10% buffer, minimum 100
-  const maxProtein = Math.max(dataMaxProtein * 1.1, 10) // Add 10% buffer, minimum 10
-  const maxCarbs = Math.max(dataMaxCarbs * 1.1, 10) // Add 10% buffer, minimum 10
-  const maxFat = Math.max(dataMaxFat * 1.1, 10) // Add 10% buffer, minimum 10
 
   return (
     <div className="space-y-6">
@@ -136,21 +127,42 @@ export default function TrendsPage() {
                     No data available for the selected period
                   </div>
                 ) : (
-                  <div className="flex h-[350px] items-end justify-between gap-2">
-                    {trendData.map((item, i) => {
-                      const heightPercentage = Math.max(1, (item.calories / maxCalories) * 100)
-                      return (
-                        <div key={i} className="flex flex-1 flex-col items-center">
-                          <div
-                            className="w-full rounded-t-sm bg-gradient-to-t from-orange-500 to-red-500 min-h-[8px]"
-                            style={{ height: `${heightPercentage}%` }}
-                          ></div>
-                          <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
-                          <div className="text-xs font-medium">{item.calories}</div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="date" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                        interval={0}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        domain={[0, 'dataMax + 100']}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`${value} cal`, 'Calories']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar dataKey="calories" radius={[8, 8, 0, 0]}>
+                        {trendData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill="url(#colorCalories)" />
+                        ))}
+                      </Bar>
+                      <defs>
+                        <linearGradient id="colorCalories" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ef4444" stopOpacity={1} />
+                          <stop offset="100%" stopColor="#f97316" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
+                    </BarChart>
+                  </ResponsiveContainer>
                 )}
               </div>
             </CardContent>
@@ -174,21 +186,42 @@ export default function TrendsPage() {
                     No data available for the selected period
                   </div>
                 ) : (
-                  <div className="flex h-[350px] items-end justify-between gap-2">
-                    {trendData.map((item, i) => {
-                      const heightPercentage = Math.max(1, (item.protein / maxProtein) * 100)
-                      return (
-                        <div key={i} className="flex flex-1 flex-col items-center">
-                          <div
-                            className="w-full rounded-t-sm bg-gradient-to-t from-green-500 to-emerald-500 min-h-[8px]"
-                            style={{ height: `${heightPercentage}%` }}
-                          ></div>
-                          <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
-                          <div className="text-xs font-medium">{item.protein}g</div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="date" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                        interval={0}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        domain={[0, 'dataMax + 10']}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`${value}g`, 'Protein']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar dataKey="protein" radius={[8, 8, 0, 0]}>
+                        {trendData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill="url(#colorProtein)" />
+                        ))}
+                      </Bar>
+                      <defs>
+                        <linearGradient id="colorProtein" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
+                          <stop offset="100%" stopColor="#22c55e" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
+                    </BarChart>
+                  </ResponsiveContainer>
                 )}
               </div>
             </CardContent>
@@ -212,21 +245,42 @@ export default function TrendsPage() {
                     No data available for the selected period
                   </div>
                 ) : (
-                  <div className="flex h-[350px] items-end justify-between gap-2">
-                    {trendData.map((item, i) => {
-                      const heightPercentage = Math.max(1, (item.carbs / maxCarbs) * 100)
-                      return (
-                        <div key={i} className="flex flex-1 flex-col items-center">
-                          <div
-                            className="w-full rounded-t-sm bg-gradient-to-t from-purple-500 to-violet-500 min-h-[8px]"
-                            style={{ height: `${heightPercentage}%` }}
-                          ></div>
-                          <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
-                          <div className="text-xs font-medium">{item.carbs}g</div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="date" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                        interval={0}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        domain={[0, 'dataMax + 10']}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`${value}g`, 'Carbs']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar dataKey="carbs" radius={[8, 8, 0, 0]}>
+                        {trendData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill="url(#colorCarbs)" />
+                        ))}
+                      </Bar>
+                      <defs>
+                        <linearGradient id="colorCarbs" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1} />
+                          <stop offset="100%" stopColor="#a855f7" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
+                    </BarChart>
+                  </ResponsiveContainer>
                 )}
               </div>
             </CardContent>
@@ -250,21 +304,42 @@ export default function TrendsPage() {
                     No data available for the selected period
                   </div>
                 ) : (
-                  <div className="flex h-[350px] items-end justify-between gap-2">
-                    {trendData.map((item, i) => {
-                      const heightPercentage = Math.max(1, (item.fat / maxFat) * 100)
-                      return (
-                        <div key={i} className="flex flex-1 flex-col items-center">
-                          <div
-                            className="w-full rounded-t-sm bg-gradient-to-t from-yellow-500 to-amber-500 min-h-[8px]"
-                            style={{ height: `${heightPercentage}%` }}
-                          ></div>
-                          <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
-                          <div className="text-xs font-medium">{item.fat}g</div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="date" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                        interval={0}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        domain={[0, 'dataMax + 10']}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`${value}g`, 'Fat']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar dataKey="fat" radius={[8, 8, 0, 0]}>
+                        {trendData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill="url(#colorFat)" />
+                        ))}
+                      </Bar>
+                      <defs>
+                        <linearGradient id="colorFat" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#eab308" stopOpacity={1} />
+                          <stop offset="100%" stopColor="#f59e0b" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
+                    </BarChart>
+                  </ResponsiveContainer>
                 )}
               </div>
             </CardContent>
