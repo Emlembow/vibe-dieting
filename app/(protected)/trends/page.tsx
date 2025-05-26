@@ -132,16 +132,19 @@ export default function TrendsPage() {
                   </div>
                 ) : (
                   <div className="flex h-[350px] items-end justify-between gap-2">
-                    {trendData.map((item, i) => (
-                      <div key={i} className="flex flex-1 flex-col items-center">
-                        <div
-                          className="w-full rounded-t-sm bg-gradient-to-t from-orange-500 to-red-500"
-                          style={{ height: `${(item.calories / maxCalories) * 100}%` }}
-                        ></div>
-                        <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
-                        <div className="text-xs font-medium">{item.calories}</div>
-                      </div>
-                    ))}
+                    {trendData.map((item, i) => {
+                      const heightPercentage = Math.max(2, (item.calories / maxCalories) * 100)
+                      return (
+                        <div key={i} className="flex flex-1 flex-col items-center">
+                          <div
+                            className="w-full rounded-t-sm bg-gradient-to-t from-orange-500 to-red-500 min-h-[8px]"
+                            style={{ height: `${heightPercentage}%` }}
+                          ></div>
+                          <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
+                          <div className="text-xs font-medium">{item.calories}</div>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -167,16 +170,19 @@ export default function TrendsPage() {
                   </div>
                 ) : (
                   <div className="flex h-[350px] items-end justify-between gap-2">
-                    {trendData.map((item, i) => (
-                      <div key={i} className="flex flex-1 flex-col items-center">
-                        <div
-                          className="w-full rounded-t-sm bg-gradient-to-t from-green-500 to-emerald-500"
-                          style={{ height: `${(item.protein / maxProtein) * 100}%` }}
-                        ></div>
-                        <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
-                        <div className="text-xs font-medium">{item.protein}g</div>
-                      </div>
-                    ))}
+                    {trendData.map((item, i) => {
+                      const heightPercentage = Math.max(2, (item.protein / maxProtein) * 100)
+                      return (
+                        <div key={i} className="flex flex-1 flex-col items-center">
+                          <div
+                            className="w-full rounded-t-sm bg-gradient-to-t from-green-500 to-emerald-500 min-h-[8px]"
+                            style={{ height: `${heightPercentage}%` }}
+                          ></div>
+                          <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
+                          <div className="text-xs font-medium">{item.protein}g</div>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -202,16 +208,19 @@ export default function TrendsPage() {
                   </div>
                 ) : (
                   <div className="flex h-[350px] items-end justify-between gap-2">
-                    {trendData.map((item, i) => (
-                      <div key={i} className="flex flex-1 flex-col items-center">
-                        <div
-                          className="w-full rounded-t-sm bg-gradient-to-t from-purple-500 to-violet-500"
-                          style={{ height: `${(item.carbs / maxCarbs) * 100}%` }}
-                        ></div>
-                        <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
-                        <div className="text-xs font-medium">{item.carbs}g</div>
-                      </div>
-                    ))}
+                    {trendData.map((item, i) => {
+                      const heightPercentage = Math.max(2, (item.carbs / maxCarbs) * 100)
+                      return (
+                        <div key={i} className="flex flex-1 flex-col items-center">
+                          <div
+                            className="w-full rounded-t-sm bg-gradient-to-t from-purple-500 to-violet-500 min-h-[8px]"
+                            style={{ height: `${heightPercentage}%` }}
+                          ></div>
+                          <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
+                          <div className="text-xs font-medium">{item.carbs}g</div>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -237,16 +246,19 @@ export default function TrendsPage() {
                   </div>
                 ) : (
                   <div className="flex h-[350px] items-end justify-between gap-2">
-                    {trendData.map((item, i) => (
-                      <div key={i} className="flex flex-1 flex-col items-center">
-                        <div
-                          className="w-full rounded-t-sm bg-gradient-to-t from-yellow-500 to-amber-500"
-                          style={{ height: `${(item.fat / maxFat) * 100}%` }}
-                        ></div>
-                        <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
-                        <div className="text-xs font-medium">{item.fat}g</div>
-                      </div>
-                    ))}
+                    {trendData.map((item, i) => {
+                      const heightPercentage = Math.max(2, (item.fat / maxFat) * 100)
+                      return (
+                        <div key={i} className="flex flex-1 flex-col items-center">
+                          <div
+                            className="w-full rounded-t-sm bg-gradient-to-t from-yellow-500 to-amber-500 min-h-[8px]"
+                            style={{ height: `${heightPercentage}%` }}
+                          ></div>
+                          <div className="mt-2 text-xs text-muted-foreground">{item.date}</div>
+                          <div className="text-xs font-medium">{item.fat}g</div>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
