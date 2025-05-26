@@ -57,7 +57,7 @@ Deploy instantly to Vercel with automated database setup:
 
 - Node.js 18+ with npm/pnpm/yarn
 - [Supabase account](https://supabase.com) (free tier available)
-- [OpenAI API key](https://platform.openai.com) with GPT-4.1 Nano access
+- [OpenAI API key](https://platform.openai.com) with multimodal model access
 
 ### Installation
 
@@ -119,7 +119,7 @@ If you prefer manual setup, run the SQL from `supabase/migrations/` in your Supa
 
 1. Go to [OpenAI Platform](https://platform.openai.com/assistants)
 2. Create a new assistant:
-   - **Model**: GPT-4.1 Nano (required for image analysis)
+   - **Model**: GPT-4.1 Nano (good balance of price and performance)
    - **Temperature**: 0.3
 3. **Configure JSON Schema Response Format**:
    - Enable "Response format" → Select `json_schema`
