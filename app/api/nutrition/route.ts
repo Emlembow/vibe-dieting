@@ -1,5 +1,6 @@
 import type { NutritionResponse } from "@/types/database"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
+import { authenticateRequest, unauthorizedResponse } from "@/lib/auth-api"
 
 // Assistant ID from your workspace
 const ASSISTANT_ID = "asst_WHhkCaZpesjEEX8CDNQUz0fX"
@@ -7,13 +8,20 @@ const ASSISTANT_ID = "asst_WHhkCaZpesjEEX8CDNQUz0fX"
 // Hard-coded API key for development (will be replaced by environment variable in production)
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "sk-your-api-key-here"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Authenticate the request
+    const { user, error } = await authenticateRequest(request)
+    
+    if (error || !user) {
+      return unauthorizedResponse(error || "Authentication required")
+    }
+
     // Parse the request body
     const body = await request.json().catch(() => ({}))
     const { foodName } = body || {}
 
-    console.log("Request received for food:", foodName)
+    console.log("Request received for food:", foodName, "by user:", user.id)
 
     if (!foodName) {
       return NextResponse.json({ error: "Food name is required" }, { status: 400 })

@@ -3,6 +3,13 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
+    // Only allow in development environment
+    if (process.env.NODE_ENV !== "development") {
+      return NextResponse.json(
+        { error: "This endpoint is only available in development" },
+        { status: 403 }
+      )
+    }
     // Create a server-side Supabase client
     const supabase = createServerClient()
 

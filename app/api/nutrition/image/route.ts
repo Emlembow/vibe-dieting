@@ -1,5 +1,6 @@
 import type { NutritionResponse } from "@/types/database"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
+import { authenticateRequest, unauthorizedResponse } from "@/lib/auth-api"
 
 // Assistant ID from your workspace
 const ASSISTANT_ID = "asst_WHhkCaZpesjEEX8CDNQUz0fX"
@@ -7,8 +8,15 @@ const ASSISTANT_ID = "asst_WHhkCaZpesjEEX8CDNQUz0fX"
 // Get API key from environment variable
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "sk-your-api-key-here"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Authenticate the request
+    const { user, error } = await authenticateRequest(request)
+    
+    if (error || !user) {
+      return unauthorizedResponse(error || "Authentication required")
+    }
+
     // Parse the multipart form data to get the image
     const formData = await request.formData()
     const foodImage = formData.get("foodImage") as File | null
@@ -17,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Food image is required" }, { status: 400 })
     }
 
-    console.log("Request received with food image:", foodImage.name, "Size:", foodImage.size)
+    console.log("Request received with food image:", foodImage.name, "Size:", foodImage.size, "by user:", user.id)
 
     // Common headers for all requests
     const headers = {
