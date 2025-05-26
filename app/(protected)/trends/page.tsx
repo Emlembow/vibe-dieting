@@ -56,11 +56,16 @@ export default function TrendsPage() {
     fetchTrendData()
   }, [dateRange, toast, user])
 
-  // Calculate max values for chart scaling
-  const maxCalories = Math.max(...trendData.map((d) => d.calories), macroGoal?.daily_calorie_goal || 2500)
-  const maxProtein = Math.max(...trendData.map((d) => d.protein), 150)
-  const maxCarbs = Math.max(...trendData.map((d) => d.carbs), 300)
-  const maxFat = Math.max(...trendData.map((d) => d.fat), 100)
+  // Calculate max values for chart scaling - use actual data max with a small buffer
+  const dataMaxCalories = Math.max(...trendData.map((d) => d.calories))
+  const dataMaxProtein = Math.max(...trendData.map((d) => d.protein))
+  const dataMaxCarbs = Math.max(...trendData.map((d) => d.carbs))
+  const dataMaxFat = Math.max(...trendData.map((d) => d.fat))
+  
+  const maxCalories = Math.max(dataMaxCalories * 1.1, 100) // Add 10% buffer, minimum 100
+  const maxProtein = Math.max(dataMaxProtein * 1.1, 10) // Add 10% buffer, minimum 10
+  const maxCarbs = Math.max(dataMaxCarbs * 1.1, 10) // Add 10% buffer, minimum 10
+  const maxFat = Math.max(dataMaxFat * 1.1, 10) // Add 10% buffer, minimum 10
 
   return (
     <div className="space-y-6">
@@ -133,7 +138,7 @@ export default function TrendsPage() {
                 ) : (
                   <div className="flex h-[350px] items-end justify-between gap-2">
                     {trendData.map((item, i) => {
-                      const heightPercentage = Math.max(2, (item.calories / maxCalories) * 100)
+                      const heightPercentage = Math.max(1, (item.calories / maxCalories) * 100)
                       return (
                         <div key={i} className="flex flex-1 flex-col items-center">
                           <div
@@ -171,7 +176,7 @@ export default function TrendsPage() {
                 ) : (
                   <div className="flex h-[350px] items-end justify-between gap-2">
                     {trendData.map((item, i) => {
-                      const heightPercentage = Math.max(2, (item.protein / maxProtein) * 100)
+                      const heightPercentage = Math.max(1, (item.protein / maxProtein) * 100)
                       return (
                         <div key={i} className="flex flex-1 flex-col items-center">
                           <div
@@ -209,7 +214,7 @@ export default function TrendsPage() {
                 ) : (
                   <div className="flex h-[350px] items-end justify-between gap-2">
                     {trendData.map((item, i) => {
-                      const heightPercentage = Math.max(2, (item.carbs / maxCarbs) * 100)
+                      const heightPercentage = Math.max(1, (item.carbs / maxCarbs) * 100)
                       return (
                         <div key={i} className="flex flex-1 flex-col items-center">
                           <div
@@ -247,7 +252,7 @@ export default function TrendsPage() {
                 ) : (
                   <div className="flex h-[350px] items-end justify-between gap-2">
                     {trendData.map((item, i) => {
-                      const heightPercentage = Math.max(2, (item.fat / maxFat) * 100)
+                      const heightPercentage = Math.max(1, (item.fat / maxFat) * 100)
                       return (
                         <div key={i} className="flex flex-1 flex-col items-center">
                           <div
