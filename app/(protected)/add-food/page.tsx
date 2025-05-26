@@ -243,10 +243,18 @@ export default function AddFoodPage() {
         foodName: foodName.trim(),
       }
 
+      // Get the current session to include the auth token
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        throw new Error("You must be logged in to search for food")
+      }
+
       const response = await fetch("/api/nutrition", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
         },
         body: JSON.stringify(payload),
       })
@@ -332,8 +340,18 @@ export default function AddFoodPage() {
       const formData = new FormData()
       formData.append("foodImage", image)
 
+      // Get the current session to include the auth token
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        throw new Error("You must be logged in to analyze images")
+      }
+
       const response = await fetch("/api/nutrition/image", {
         method: "POST",
+        headers: {
+          "Authorization": `Bearer ${session.access_token}`,
+        },
         body: formData,
       })
 
