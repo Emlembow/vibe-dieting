@@ -14,8 +14,8 @@ import { IceCream } from "lucide-react"
 
 const initialState = {
   success: false,
-  error: null,
-  message: null,
+  error: undefined,
+  message: undefined,
 }
 
 export default function RegisterPage() {
