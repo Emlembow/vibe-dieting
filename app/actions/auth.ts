@@ -1,5 +1,7 @@
 "use server"
 
+import { createServerClient } from "@/lib/supabase"
+
 export async function registerUser(formData: FormData) {
   try {
     const email = formData.get("email") as string
@@ -13,34 +15,61 @@ export async function registerUser(formData: FormData) {
       }
     }
 
-    // Call the secure API route instead of using admin SDK
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/auth/register`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          username,
-        }),
-      }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
+    // Validate password strength
+    if (password.length < 6) {
       return {
         success: false,
-        error: result.error || "Registration failed",
+        error: "Password must be at least 6 characters",
+      }
+    }
+
+    // Create a server-side Supabase client (now using anon key)
+    const supabase = createServerClient()
+
+    // Create the user account using standard auth (not admin)
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: username,
+        }
+      }
+    })
+
+    if (authError) {
+      return {
+        success: false,
+        error: authError.message,
+      }
+    }
+
+    if (!authData.user) {
+      return {
+        success: false,
+        error: "Failed to create user",
+      }
+    }
+
+    // Create the profile
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        id: authData.user.id,
+        username: username,
+      })
+
+    if (profileError) {
+      console.error("Error creating profile:", profileError)
+      return {
+        success: false,
+        error: "Failed to create user profile",
       }
     }
 
     return {
       success: true,
-      message: result.message || "Account created successfully!",
+      message: "Account created successfully! Please check your email to verify your account.",
     }
   } catch (error: any) {
     console.error("Registration error:", error)
