@@ -10,7 +10,7 @@ import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { registerUser } from "@/app/actions/auth"
 import { useFormState } from "react-dom"
-import { IceCream } from "lucide-react"
+import { IceCream, CheckCircle, Loader2 } from "lucide-react"
 
 const initialState = {
   success: false,
@@ -25,13 +25,6 @@ export default function RegisterPage() {
     setIsLoading(true)
     const result = await registerUser(formData)
     setIsLoading(false)
-
-    if (result.success) {
-      // Redirect after a short delay to show the success message
-      setTimeout(() => {
-        router.push("/login")
-      }, 2000)
-    }
 
     return result
   }, initialState)
@@ -59,38 +52,89 @@ export default function RegisterPage() {
               </Alert>
             )}
             {state.success && state.message && (
-              <Alert>
-                <AlertDescription>{state.message}</AlertDescription>
+              <Alert className="border-green-200 bg-green-50 text-green-900">
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription className="ml-2">
+                  <strong>Success!</strong> {state.message}
+                </AlertDescription>
               </Alert>
             )}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
-              <Input id="username" name="username" placeholder="johndoe" required />
+              <Input 
+                id="username" 
+                name="username" 
+                placeholder="johndoe" 
+                required 
+                disabled={isLoading || state.success}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="name@example.com" required />
+              <Input 
+                id="email" 
+                name="email" 
+                type="email" 
+                placeholder="name@example.com" 
+                required 
+                disabled={isLoading || state.success}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required minLength={6} />
+              <Input 
+                id="password" 
+                name="password" 
+                type="password" 
+                required 
+                minLength={6} 
+                disabled={isLoading || state.success}
+              />
               <p className="text-xs text-muted-foreground">Password must be at least 6 characters long</p>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500"
-              disabled={isLoading}
-            >
-              {isLoading ? "Creating account..." : "Create account"}
-            </Button>
-            <div className="text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/login" className="text-pink-500 hover:text-pink-600 underline">
-                Sign in
-              </Link>
-            </div>
+            {!state.success ? (
+              <>
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    "Create account"
+                  )}
+                </Button>
+                <div className="text-center text-sm">
+                  Already have an account?{" "}
+                  <Link href="/login" className="text-pink-500 hover:text-pink-600 underline">
+                    Sign in
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <div className="text-center space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  <p className="mb-2">Next steps:</p>
+                  <ol className="text-left space-y-2">
+                    <li>1. Check your email inbox for a verification link</li>
+                    <li>2. Click the link to verify your email address</li>
+                    <li>3. You'll be automatically logged in</li>
+                  </ol>
+                </div>
+                <div className="text-sm">
+                  Didn't receive the email?{" "}
+                  <Link href="/login" className="text-pink-500 hover:text-pink-600 underline">
+                    Try logging in
+                  </Link>
+                </div>
+              </div>
+            )}
           </CardFooter>
         </form>
       </Card>
