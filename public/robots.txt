@@ -1,11 +1,16 @@
 # https://www.robotstxt.org/robotstxt.html
 
 # Block AI crawlers to prevent high hosting costs and unauthorized AI training
-# OpenAI GPTBot
+# OpenAI crawlers
+# GPTBot - Used for training generative AI models
 User-agent: GPTBot
 Disallow: /
 
-# ChatGPT Plugin
+# OAI-SearchBot - Used for ChatGPT search features
+User-agent: OAI-SearchBot
+Disallow: /
+
+# ChatGPT-User - Used when users interact with ChatGPT
 User-agent: ChatGPT-User
 Disallow: /
 
