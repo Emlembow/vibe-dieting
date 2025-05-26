@@ -14,15 +14,16 @@ export const supabase = (() => {
 })()
 
 // Create a helper to get the server supabase client
+// NOTE: This now uses the anon key for security. Service role key should only be used in secure backend services.
 export const createServerClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Missing Supabase environment variables")
   }
   
-  return createClient(supabaseUrl, serviceRoleKey, {
+  return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: false,
     },
