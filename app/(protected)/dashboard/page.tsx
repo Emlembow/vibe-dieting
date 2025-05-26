@@ -374,8 +374,8 @@ export default function DashboardPage() {
                 <ScrollArea className="h-[400px] pr-4">
                   <div className="space-y-3">
                     {foodEntries.map((entry) => (
-                      <div key={entry.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
-                        <div className="grid gap-1 flex-1">
+                      <div key={entry.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border p-3 text-sm gap-2">
+                        <div className="grid gap-1 flex-1 w-full">
                           <div className="flex items-center justify-between">
                             <div className="font-medium">{entry.name}</div>
                             <div className="flex items-center text-xs text-muted-foreground">
@@ -388,34 +388,34 @@ export default function DashboardPage() {
                               ? `${entry.description.substring(0, 60)}...`
                               : entry.description}
                           </div>
-                          <div className="flex flex-wrap gap-2 mt-1">
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-1">
                             <Badge
                               variant="outline"
-                              className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20"
+                              className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20 text-xs py-0.5 px-2"
                             >
                               {entry.calories} kcal
                             </Badge>
                             <Badge
                               variant="outline"
-                              className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20"
+                              className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20 text-xs py-0.5 px-2"
                             >
                               P: {entry.protein_grams}g
                             </Badge>
                             <Badge
                               variant="outline"
-                              className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20"
+                              className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20 text-xs py-0.5 px-2"
                             >
                               C: {entry.carbs_total_grams}g
                             </Badge>
                             <Badge
                               variant="outline"
-                              className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20"
+                              className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20 text-xs py-0.5 px-2"
                             >
                               F: {entry.fat_total_grams}g
                             </Badge>
                           </div>
                         </div>
-                        <div className="flex ml-2">
+                        <div className="flex gap-1 w-full sm:w-auto sm:ml-2">
                           <Button
                             variant="ghost"
                             size="icon"

@@ -148,32 +148,32 @@ export default function GoalsPage() {
   const fatGrams = (calorieGoal * (fatPercentage / 100)) / 9
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center">
-        <Button variant="ghost" size="icon" className="mr-2" onClick={() => router.push("/dashboard")}>
-          <ArrowLeft className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="mr-2 h-8 w-8 sm:h-10 sm:w-10" onClick={() => router.push("/dashboard")}>
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           <span className="sr-only">Back to Dashboard</span>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Macro Goals</h1>
-          <p className="text-muted-foreground">Set your daily calorie and macronutrient targets</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Macro Goals</h1>
+          <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">Set your daily calorie and macronutrient targets</p>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <Card>
           <form onSubmit={handleSubmit}>
             <CardHeader>
               <CardTitle>Daily Calorie Target</CardTitle>
               <CardDescription>Set your total daily calorie goal</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <Label htmlFor="calories">Daily Calorie Goal</Label>
                   <span className="text-sm font-medium">{calorieGoal} kcal</span>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
                   <Button
                     type="button"
                     variant="outline"
@@ -215,8 +215,8 @@ export default function GoalsPage() {
               <CardTitle>Macronutrient Distribution</CardTitle>
               <CardDescription>Adjust the percentage of calories from each macronutrient</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <div className="flex items-center">

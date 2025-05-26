@@ -544,24 +544,24 @@ export default function AddFoodPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" className="mr-2" onClick={() => router.push("/dashboard")}>
-            <ArrowLeft className="h-5 w-5" />
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+        <div className="flex items-center w-full sm:w-auto">
+          <Button variant="ghost" size="icon" className="mr-2 h-8 w-8 sm:h-10 sm:w-10" onClick={() => router.push("/dashboard")}>
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             <span className="sr-only">Back to Dashboard</span>
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Add Food</h1>
-            <p className="text-muted-foreground">Vibe with your meals and track your nutrition</p>
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Add Food</h1>
+            <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">Vibe with your meals and track your nutrition</p>
           </div>
         </div>
-        <div>
+        <div className="w-full sm:w-auto">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {format(date, "MMMM d, yyyy")}
+              <Button variant="outline" className="w-full sm:w-[240px] justify-start text-left font-normal h-9 sm:h-10 text-sm">
+                <CalendarIcon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                {format(date, "MMM d, yyyy")}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
@@ -574,11 +574,23 @@ export default function AddFoodPage() {
       {/* Only show tabs if no nutrition data is available yet */}
       {!nutritionData ? (
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
-            <TabsTrigger value="recent">Recent Foods</TabsTrigger>
-            <TabsTrigger value="search">Search Food</TabsTrigger>
-            <TabsTrigger value="image">Image Upload</TabsTrigger>
-            <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6 gap-1">
+            <TabsTrigger value="recent" className="text-xs sm:text-sm px-2">
+              <span className="hidden sm:inline">Recent Foods</span>
+              <span className="sm:hidden">Recent</span>
+            </TabsTrigger>
+            <TabsTrigger value="search" className="text-xs sm:text-sm px-2">
+              <span className="hidden sm:inline">Search Food</span>
+              <span className="sm:hidden">Search</span>
+            </TabsTrigger>
+            <TabsTrigger value="image" className="text-xs sm:text-sm px-2">
+              <span className="hidden sm:inline">Image Upload</span>
+              <span className="sm:hidden">Image</span>
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="text-xs sm:text-sm px-2">
+              <span className="hidden sm:inline">Manual Entry</span>
+              <span className="sm:hidden">Manual</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recent" className="space-y-6">
@@ -643,14 +655,14 @@ export default function AddFoodPage() {
                         </Button>
                       </div>
                     ) : (
-                      <ScrollArea className="h-[400px] pr-4">
+                      <ScrollArea className="h-[350px] sm:h-[400px] pr-2 sm:pr-4">
                         <div className="space-y-3">
                           {filteredRecentFoods.map((food, index) => (
                             <div
                               key={`${food.name}-${index}`}
-                              className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                              className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border p-3 sm:p-4 hover:bg-muted/50 transition-colors gap-3"
                             >
-                              <div className="flex-1">
+                              <div className="flex-1 w-full">
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="font-medium">
                                     {recentFoodsSearch ? (
@@ -692,35 +704,35 @@ export default function AddFoodPage() {
                                   </span>
                                   <span>Added {food.frequency}x</span>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                                   <Badge
                                     variant="outline"
-                                    className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20"
+                                    className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20 text-xs py-0.5 px-2"
                                   >
                                     {food.calories} kcal
                                   </Badge>
                                   <Badge
                                     variant="outline"
-                                    className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20"
+                                    className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20 text-xs py-0.5 px-2"
                                   >
                                     P: {food.protein_grams}g
                                   </Badge>
                                   <Badge
                                     variant="outline"
-                                    className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20"
+                                    className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20 text-xs py-0.5 px-2"
                                   >
                                     C: {food.carbs_total_grams}g
                                   </Badge>
                                   <Badge
                                     variant="outline"
-                                    className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20"
+                                    className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20 text-xs py-0.5 px-2"
                                   >
                                     F: {food.fat_total_grams}g
                                   </Badge>
                                 </div>
                               </div>
-                              <div className="ml-4">
-                                <Button onClick={() => handleAddRecentFood(food)} disabled={isSaving} size="sm">
+                              <div className="w-full sm:w-auto sm:ml-4">
+                                <Button onClick={() => handleAddRecentFood(food)} disabled={isSaving} size="sm" className="w-full sm:w-auto">
                                   {isSaving ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
@@ -749,7 +761,7 @@ export default function AddFoodPage() {
                 <CardDescription>Enter a food name to get nutrition information</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -817,7 +829,7 @@ export default function AddFoodPage() {
                   ) : (
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                      className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 sm:p-12 text-center cursor-pointer hover:bg-muted/50 transition-colors"
                     >
                       <div className="rounded-full bg-muted p-3 mb-4">
                         <Camera className="h-6 w-6 text-muted-foreground" />
@@ -896,7 +908,7 @@ export default function AddFoodPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="manual-protein">Protein (g)</Label>
                       <Input
@@ -904,6 +916,7 @@ export default function AddFoodPage() {
                         type="number"
                         value={manualEntry.protein}
                         onChange={(e) => setManualEntry({ ...manualEntry, protein: Number(e.target.value) })}
+                        className="h-9"
                       />
                     </div>
                     <div className="space-y-2">
@@ -913,6 +926,7 @@ export default function AddFoodPage() {
                         type="number"
                         value={manualEntry.carbs}
                         onChange={(e) => setManualEntry({ ...manualEntry, carbs: Number(e.target.value) })}
+                        className="h-9"
                       />
                     </div>
                     <div className="space-y-2">
@@ -922,6 +936,7 @@ export default function AddFoodPage() {
                         type="number"
                         value={manualEntry.fat}
                         onChange={(e) => setManualEntry({ ...manualEntry, fat: Number(e.target.value) })}
+                        className="h-9"
                       />
                     </div>
                   </div>
@@ -966,7 +981,7 @@ export default function AddFoodPage() {
             <CardTitle>{nutritionData.foodDetails.name}</CardTitle>
             <CardDescription>{nutritionData.foodDetails.description}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Calories</h3>
@@ -974,10 +989,10 @@ export default function AddFoodPage() {
                 <p className="text-sm text-muted-foreground">kcal</p>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-3 sm:gap-4">
                 <div className="text-center">
-                  <div className="flex h-16 w-16 flex-col items-center justify-center rounded-full bg-green-500/10 border border-green-500/20">
-                    <span className="text-lg font-bold text-green-500">
+                  <div className="flex h-14 w-14 sm:h-16 sm:w-16 flex-col items-center justify-center rounded-full bg-green-500/10 border border-green-500/20">
+                    <span className="text-base sm:text-lg font-bold text-green-500">
                       {nutritionData.macronutrients.proteinGrams}
                     </span>
                     <span className="text-xs text-green-500">g</span>
@@ -986,8 +1001,8 @@ export default function AddFoodPage() {
                 </div>
 
                 <div className="text-center">
-                  <div className="flex h-16 w-16 flex-col items-center justify-center rounded-full bg-purple-500/10 border border-purple-500/20">
-                    <span className="text-lg font-bold text-purple-500">
+                  <div className="flex h-14 w-14 sm:h-16 sm:w-16 flex-col items-center justify-center rounded-full bg-purple-500/10 border border-purple-500/20">
+                    <span className="text-base sm:text-lg font-bold text-purple-500">
                       {nutritionData.macronutrients.carbohydrates.totalGrams}
                     </span>
                     <span className="text-xs text-purple-500">g</span>
@@ -996,8 +1011,8 @@ export default function AddFoodPage() {
                 </div>
 
                 <div className="text-center">
-                  <div className="flex h-16 w-16 flex-col items-center justify-center rounded-full bg-yellow-500/10 border border-yellow-500/20">
-                    <span className="text-lg font-bold text-yellow-500">
+                  <div className="flex h-14 w-14 sm:h-16 sm:w-16 flex-col items-center justify-center rounded-full bg-yellow-500/10 border border-yellow-500/20">
+                    <span className="text-base sm:text-lg font-bold text-yellow-500">
                       {nutritionData.macronutrients.fat.totalGrams}
                     </span>
                     <span className="text-xs text-yellow-500">g</span>
@@ -1009,7 +1024,7 @@ export default function AddFoodPage() {
 
             <Separator />
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-4">
                 <h3 className="font-medium">Carbohydrates</h3>
                 <div className="space-y-2">
