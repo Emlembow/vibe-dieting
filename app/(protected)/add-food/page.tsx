@@ -27,6 +27,7 @@ import {
   X,
   Clock,
   Sparkles,
+  Pencil,
 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -574,20 +575,24 @@ export default function AddFoodPage() {
       {/* Only show tabs if no nutrition data is available yet */}
       {!nutritionData ? (
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6 gap-1">
-            <TabsTrigger value="recent" className="text-xs sm:text-sm px-2">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6 gap-2 h-auto p-1.5 bg-muted/50">
+            <TabsTrigger value="recent" className="text-xs sm:text-sm px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Clock className="mr-1.5 h-3.5 w-3.5 sm:hidden" />
               <span className="hidden sm:inline">Recent Foods</span>
               <span className="sm:hidden">Recent</span>
             </TabsTrigger>
-            <TabsTrigger value="search" className="text-xs sm:text-sm px-2">
+            <TabsTrigger value="search" className="text-xs sm:text-sm px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Search className="mr-1.5 h-3.5 w-3.5 sm:hidden" />
               <span className="hidden sm:inline">Search Food</span>
               <span className="sm:hidden">Search</span>
             </TabsTrigger>
-            <TabsTrigger value="image" className="text-xs sm:text-sm px-2">
+            <TabsTrigger value="image" className="text-xs sm:text-sm px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Camera className="mr-1.5 h-3.5 w-3.5 sm:hidden" />
               <span className="hidden sm:inline">Image Upload</span>
               <span className="sm:hidden">Image</span>
             </TabsTrigger>
-            <TabsTrigger value="manual" className="text-xs sm:text-sm px-2">
+            <TabsTrigger value="manual" className="text-xs sm:text-sm px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Pencil className="mr-1.5 h-3.5 w-3.5 sm:hidden" />
               <span className="hidden sm:inline">Manual Entry</span>
               <span className="sm:hidden">Manual</span>
             </TabsTrigger>
