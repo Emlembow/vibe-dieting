@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart2, Home, PlusCircle, Settings, LogOut, IceCream } from "lucide-react"
+import { BarChart2, Home, PlusCircle, Settings, LogOut, IceCream, Github } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import {
@@ -82,6 +82,14 @@ export function SidebarNav() {
       </SidebarContent>
       <SidebarFooter className="border-t border-border/50">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="https://github.com/Emlembow/vibe-dieting" target="_blank" rel="noopener noreferrer">
+                <Github className="h-4 w-4" />
+                <span>View Source</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleSignOut}>
               <LogOut className="h-4 w-4" />

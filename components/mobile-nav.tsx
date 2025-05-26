@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Menu, IceCream, LayoutDashboard, PlusCircle, Settings, BarChart2, LogOut } from "lucide-react"
+import { Menu, IceCream, LayoutDashboard, PlusCircle, Settings, BarChart2, LogOut, Github } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { supabase } from "@/lib/supabase"
@@ -87,6 +87,16 @@ export function MobileNav() {
                   <span className="ml-3">{route.label}</span>
                 </Link>
               ))}
+              <Link
+                href="https://github.com/Emlembow/vibe-dieting"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setOpen(false)}
+                className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <Github className="h-5 w-5" />
+                <span className="ml-3">View Source</span>
+              </Link>
               <Button
                 variant="ghost"
                 className="flex items-center justify-start rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
