@@ -96,7 +96,7 @@ export default function AddFoodPage() {
         // Group by food name and calculate smart scores
         const foodGroups = new Map<string, FoodEntry[]>()
 
-        entries?.forEach((entry) => {
+        entries?.forEach((entry: FoodEntry) => {
           const key = entry.name.toLowerCase()
           if (!foodGroups.has(key)) {
             foodGroups.set(key, [])

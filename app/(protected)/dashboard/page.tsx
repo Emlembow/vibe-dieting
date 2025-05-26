@@ -128,7 +128,7 @@ export default function DashboardPage() {
 
         // Sum up the entries for each day
         if (entriesData) {
-          entriesData.forEach((entry) => {
+          entriesData.forEach((entry: any) => {
             const entryDate = parseISO(entry.date)
             const dayIndex = dailyTotals.findIndex(
               (day) => format(day.date, "yyyy-MM-dd") === format(entryDate, "yyyy-MM-dd"),
