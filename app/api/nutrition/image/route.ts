@@ -1,5 +1,9 @@
 import type { NutritionResponse } from "@/types/database"
 import { NextResponse } from "next/server"
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { nutritionImageRequestSchema } from "@/lib/validations"
+import { headers } from "next/headers"
+import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth"
 
 // Type for the OpenAI Assistant response format
 interface AssistantResponse {
@@ -51,15 +55,38 @@ if (!OPENAI_API_KEY) {
 
 export async function POST(request: Request) {
   try {
+    // Check authentication
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return unauthorizedResponse()
+    }
+
+    // Rate limiting check - use user ID for authenticated users
+    const headersList = await headers()
+    const identifier = user.id || headersList.get("x-forwarded-for") || "anonymous"
+    const { success } = await checkRateLimit(identifier)
+    
+    if (!success) {
+      return rateLimitResponse()
+    }
+
     // Parse the multipart form data to get the image
     const formData = await request.formData()
     const foodImage = formData.get("foodImage") as File | null
 
-    if (!foodImage) {
-      return NextResponse.json({ error: "Food image is required" }, { status: 400 })
+    // Validate the image
+    const validationResult = nutritionImageRequestSchema.safeParse({ foodImage })
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { 
+          error: "Invalid image",
+          details: validationResult.error.errors.map(e => e.message).join(", ")
+        }, 
+        { status: 400 }
+      )
     }
 
-    console.log("Request received with food image:", foodImage.name, "Size:", foodImage.size)
+    console.log("Request received with food image:", foodImage!.name, "Size:", foodImage!.size)
 
     // Common headers for all requests
     const headers = {

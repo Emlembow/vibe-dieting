@@ -1,5 +1,9 @@
 import type { NutritionResponse } from "@/types/database"
 import { NextResponse } from "next/server"
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { nutritionRequestSchema, sanitizeInput } from "@/lib/validations"
+import { headers } from "next/headers"
+import { getAuthenticatedUser, unauthorizedResponse } from "@/lib/auth"
 
 // Type for the OpenAI Assistant response format
 interface AssistantResponse {
@@ -51,15 +55,40 @@ if (!OPENAI_API_KEY) {
 
 export async function POST(request: Request) {
   try {
-    // Parse the request body
-    const body = await request.json().catch(() => ({}))
-    const { foodName } = body || {}
-
-    console.log("Request received for food:", foodName)
-
-    if (!foodName) {
-      return NextResponse.json({ error: "Food name is required" }, { status: 400 })
+    // Check authentication
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return unauthorizedResponse()
     }
+
+    // Rate limiting check - use user ID for authenticated users
+    const headersList = await headers()
+    const identifier = user.id || headersList.get("x-forwarded-for") || "anonymous"
+    const { success } = await checkRateLimit(identifier)
+    
+    if (!success) {
+      return rateLimitResponse()
+    }
+
+    // Parse and validate the request body
+    const body = await request.json().catch(() => ({}))
+    
+    // Validate input
+    const validationResult = nutritionRequestSchema.safeParse(body)
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { 
+          error: "Invalid request",
+          details: validationResult.error.errors.map(e => e.message).join(", ")
+        }, 
+        { status: 400 }
+      )
+    }
+    
+    const { foodName } = validationResult.data
+    const sanitizedFoodName = sanitizeInput(foodName)
+    
+    console.log("Request received for food:", sanitizedFoodName)
 
     // Use the environment variable for the API key
     console.log("Using API key from environment variable")
@@ -96,7 +125,7 @@ export async function POST(request: Request) {
       headers,
       body: JSON.stringify({
         role: "user",
-        content: `Provide nutrition information for: ${foodName}`,
+        content: `Provide nutrition information for: ${sanitizedFoodName}`,
       }),
     })
 
