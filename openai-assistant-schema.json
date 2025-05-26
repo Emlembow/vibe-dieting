@@ -1,0 +1,93 @@
+{
+  "name": "food_schema",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "foodDetails": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the food item."
+          },
+          "description": {
+            "type": "string",
+            "description": "A brief description of the food item."
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "macronutrients": {
+        "type": "object",
+        "properties": {
+          "calories": {
+            "type": "number",
+            "description": "Total calories in the food item."
+          },
+          "proteinGrams": {
+            "type": "number",
+            "description": "Amount of protein in grams."
+          },
+          "carbohydrates": {
+            "type": "object",
+            "properties": {
+              "totalGrams": {
+                "type": "number",
+                "description": "Total carbohydrates in grams."
+              },
+              "fiberGrams": {
+                "type": "number",
+                "description": "Amount of dietary fiber in grams."
+              },
+              "sugarGrams": {
+                "type": "number",
+                "description": "Amount of sugar in grams."
+              }
+            },
+            "required": [
+              "totalGrams",
+              "fiberGrams",
+              "sugarGrams"
+            ],
+            "additionalProperties": false
+          },
+          "fat": {
+            "type": "object",
+            "properties": {
+              "totalGrams": {
+                "type": "number",
+                "description": "Total fat in grams."
+              },
+              "saturatedGrams": {
+                "type": "number",
+                "description": "Amount of saturated fat in grams."
+              }
+            },
+            "required": [
+              "totalGrams",
+              "saturatedGrams"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "calories",
+          "proteinGrams",
+          "carbohydrates",
+          "fat"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "foodDetails",
+      "macronutrients"
+    ],
+    "additionalProperties": false
+  }
+}
