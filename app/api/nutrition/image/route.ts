@@ -73,8 +73,7 @@ export async function POST(request: NextRequest) {
         text: {
           format: {
             type: "json_schema",
-            name: "nutrition_response",
-            json_schema: schema.schema
+            json_schema: schema
           }
         }
       }),
