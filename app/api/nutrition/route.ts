@@ -55,7 +55,10 @@ export async function POST(request: NextRequest) {
         text: {
           format: {
             type: "json_schema",
-            json_schema: schema
+            json_schema: {
+              name: "nutrition_response",
+              ...schema
+            }
           }
         }
       }),
