@@ -1,17 +1,18 @@
 import type { NutritionResponse } from "@/types/database"
 import { NextRequest, NextResponse } from "next/server"
 import { authenticateRequest, unauthorizedResponse } from "@/lib/auth-api"
+import { readFileSync } from "fs"
+import { join } from "path"
 
 export async function POST(request: NextRequest) {
   try {
     // Get configuration from environment variables
-    const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
     // Validate required environment variables
-    if (!OPENAI_API_KEY || !ASSISTANT_ID) {
+    if (!OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: "Missing required environment variables: OPENAI_API_KEY and OPENAI_ASSISTANT_ID" },
+        { error: "Missing required environment variable: OPENAI_API_KEY" },
         { status: 500 }
       )
     }
@@ -31,200 +32,72 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Food image is required" }, { status: 400 })
     }
 
+    // Load the nutrition analysis prompt
+    const promptPath = join(process.cwd(), 'prompts', 'nutrition-analysis.md')
+    const systemPrompt = readFileSync(promptPath, 'utf-8')
 
-    // Common headers for all requests
-    const headers = {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "OpenAI-Beta": "assistants=v2", // Add the required beta header
-    }
+    // Load the JSON schema for structured output
+    const schemaPath = join(process.cwd(), 'openai-assistant-schema.json')
+    const schemaContent = readFileSync(schemaPath, 'utf-8')
+    const schema = JSON.parse(schemaContent)
 
-    // 1. Create a thread
-    const threadResponse = await fetch("https://api.openai.com/v1/threads", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      body: JSON.stringify({}),
-    })
-
-    if (!threadResponse.ok) {
-      const errorData = await threadResponse.json()
-      console.error("Error creating thread:", errorData)
-      throw new Error(`Failed to create thread: ${errorData.error?.message || "Unknown error"}`)
-    }
-
-    const threadData = await threadResponse.json()
-    const threadId = threadData.id
-
-    // 2. First, upload the file to OpenAI with purpose: "vision"
+    // Convert image to base64 for the Responses API
     const imageArrayBuffer = await foodImage.arrayBuffer()
     const imageBuffer = Buffer.from(imageArrayBuffer)
+    const base64Image = imageBuffer.toString('base64')
+    const mimeType = foodImage.type || 'image/jpeg'
 
-    // Create a Blob from the file
-    const blob = new Blob([imageBuffer], { type: foodImage.type })
-
-    // Create a FormData object for the file upload
-    const fileFormData = new FormData()
-    fileFormData.append("file", blob, foodImage.name)
-    fileFormData.append("purpose", "vision") // Important: Set purpose to "vision"
-
-    const fileUploadResponse = await fetch("https://api.openai.com/v1/files", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: fileFormData,
-    })
-
-    if (!fileUploadResponse.ok) {
-      const errorData = await fileUploadResponse.json()
-      console.error("Error uploading file:", errorData)
-      throw new Error(`Failed to upload file: ${errorData.error?.message || "Unknown error"}`)
-    }
-
-    const fileData = await fileUploadResponse.json()
-    const fileId = fileData.id
-
-    // 3. Add a message with the image in the content array
-    const messageResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
+    // Create the response using OpenAI Responses API with image input
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...headers,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        role: "user",
-        content: [
+        model: "gpt-4o",
+        instructions: systemPrompt,
+        input: [
           {
-            type: "image_file",
-            image_file: { file_id: fileId },
+            type: "image",
+            image: {
+              data: base64Image,
+              media_type: mimeType
+            }
           },
           {
             type: "text",
-            text: "Analyze this food image and provide nutrition information in JSON format.",
-          },
+            text: "Analyze this food image and provide nutrition information in JSON format."
+          }
         ],
+        text: {
+          format: {
+            type: "json_schema",
+            json_schema: schema
+          }
+        }
       }),
     })
 
-    if (!messageResponse.ok) {
-      const errorData = await messageResponse.json()
-      console.error("Error adding message:", errorData)
-      throw new Error(`Failed to add message: ${errorData.error?.message || "Unknown error"}`)
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error("Error creating response:", errorData)
+      throw new Error(`Failed to create response: ${errorData.error?.message || "Unknown error"}`)
     }
 
+    const responseData = await response.json()
 
-    // 4. Run the assistant
-    const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      body: JSON.stringify({
-        assistant_id: ASSISTANT_ID,
-      }),
-    })
-
-    if (!runResponse.ok) {
-      const errorData = await runResponse.json()
-      console.error("Error running assistant:", errorData)
-      throw new Error(`Failed to run assistant: ${errorData.error?.message || "Unknown error"}`)
-    }
-
-    const runData = await runResponse.json()
-    const runId = runData.id
-
-    // 5. Poll for the run to complete
-    let runStatus = "queued"
-    let attempts = 0
-    const maxAttempts = 60 // 60 seconds timeout (image processing may take longer)
-
-    while (runStatus !== "completed" && attempts < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      const statusResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
-        method: "GET",
-        headers,
-      })
-
-      if (!statusResponse.ok) {
-        const errorData = await statusResponse.json()
-        console.error("Error checking run status:", errorData)
-        throw new Error(`Failed to check run status: ${errorData.error?.message || "Unknown error"}`)
-      }
-
-      const statusData = await statusResponse.json()
-      runStatus = statusData.status
-      attempts++
-
-      if (runStatus === "failed" || runStatus === "cancelled" || runStatus === "expired") {
-        throw new Error(`Run failed with status: ${runStatus}`)
-      }
-    }
-
-    if (runStatus !== "completed") {
-      throw new Error(`Run timed out or failed with status: ${runStatus}`)
-    }
-
-    // 6. Get the messages from the thread
-    const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
-      method: "GET",
-      headers,
-    })
-
-    if (!messagesResponse.ok) {
-      const errorData = await messagesResponse.json()
-      console.error("Error retrieving messages:", errorData)
-      throw new Error(`Failed to retrieve messages: ${errorData.error?.message || "Unknown error"}`)
-    }
-
-    const messagesData = await messagesResponse.json()
-
-    // Find the assistant's response
-    const assistantMessages = messagesData.data.filter((message: any) => message.role === "assistant")
-
-    if (assistantMessages.length === 0) {
-      throw new Error("No response from assistant")
-    }
-
-    // Parse the JSON response
-    const responseContent = assistantMessages[0].content[0]
-
-    if (responseContent.type !== "text") {
-      throw new Error("Unexpected response format")
-    }
-
-
-    // Parse the JSON from the text response
-    try {
-      // Extract JSON from the response text (the assistant might include explanatory text)
-      const jsonMatch =
-        responseContent.text.value.match(/```json\s*([\s\S]*?)\s*```/) || responseContent.text.value.match(/{[\s\S]*}/)
-
-      let jsonText = jsonMatch ? jsonMatch[1] || jsonMatch[0] : responseContent.text.value
-
-      // Clean up the JSON text if needed
-      jsonText = jsonText.replace(/^```json\s*/, "").replace(/\s*```$/, "")
-
-      const nutritionData: NutritionResponse = JSON.parse(jsonText)
-
-      // Clean up - delete the file from OpenAI
+    // Extract the nutrition data from the response
+    if (responseData.output?.[0]?.content?.[0]?.type === "output_text") {
+      const textContent = responseData.output[0].content[0].text
       try {
-        await fetch(`https://api.openai.com/v1/files/${fileId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-          },
-        })
-      } catch (deleteError) {
-        // Don't throw here, as we still want to return the nutrition data
+        const nutritionData: NutritionResponse = JSON.parse(textContent)
+        return NextResponse.json(nutritionData)
+      } catch (parseError) {
+        throw new Error("Failed to parse nutrition data")
       }
-
-      return NextResponse.json(nutritionData)
-    } catch (parseError) {
-      throw new Error("Failed to parse nutrition data")
+    } else {
+      throw new Error("Unexpected response format")
     }
   } catch (error: any) {
     console.error("Error in nutrition image API:", error)
