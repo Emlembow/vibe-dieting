@@ -32,7 +32,7 @@ A modern nutrition tracking app that uses AI to analyze your food through text o
 ```
 Frontend:  Next.js 15 + React + TypeScript + Tailwind CSS
 Backend:   Next.js API Routes + Supabase Database
-AI:        OpenAI Assistant API (GPT-4.1 Nano)
+AI:        OpenAI Responses API (GPT-4.1 Nano)
 UI:        shadcn/ui Components
 Auth:      Supabase Authentication
 Deploy:    Vercel + Automated Database Setup
@@ -47,7 +47,7 @@ Deploy instantly to Vercel with automated database setup:
 ### Post-Deploy Setup
 1. Create a [Supabase project](https://app.supabase.com) and add credentials to Vercel environment variables
 2. Run `npm run db:push` to set up database schema
-3. Create OpenAI Assistant using provided configuration files
+3. Set up OpenAI API key for the Responses API
 
 ---
 
@@ -87,7 +87,6 @@ Deploy instantly to Vercel with automated database setup:
    
    # OpenAI
    OPENAI_API_KEY=sk-proj-your-api-key
-   OPENAI_ASSISTANT_ID=asst_your-assistant-id
    ```
 
 ### Database Setup (Automated)
@@ -115,20 +114,15 @@ If you prefer manual setup, run the SQL from `supabase/migrations/` in your Supa
 
 </details>
 
-### OpenAI Assistant Configuration
+### OpenAI API Configuration
 
-1. Go to [OpenAI Platform](https://platform.openai.com/assistants)
-2. Create a new assistant:
-   - **Model**: GPT-4.1 Nano (good balance of price and performance)
-   - **Temperature**: 0.3
-3. **Configure JSON Schema Response Format**:
-   - Enable "Response format" → Select `json_schema`
-   - Copy contents from `openai-assistant-schema.json` into schema field
-4. **Set Instructions**:
-   - Copy from `openai-assistant-prompt.md` into Instructions field
-5. Save and add the assistant ID to `.env.local`
+1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Add the API key to your `.env.local` file as `OPENAI_API_KEY`
 
-> ⚠️ **Critical**: JSON schema configuration is required for proper response parsing
+The app uses the OpenAI Responses API with:
+- **Model**: GPT-4.1 Nano (optimized for cost and performance)
+- **Function calling**: Structured JSON responses using the schema in `openai-assistant-schema.json`
+- **Nutrition analysis**: System prompt from `prompts/nutrition-analysis.md`
 
 ### Run Development Server
 
