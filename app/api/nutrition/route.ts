@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { authenticateRequest, unauthorizedResponse } from "@/lib/auth-api"
 import { readFileSync } from "fs"
 import { join } from "path"
+import OpenAI from "openai"
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,76 +42,67 @@ export async function POST(request: NextRequest) {
     const schemaContent = readFileSync(schemaPath, 'utf-8')
     const schema = JSON.parse(schemaContent)
 
-    // Create the response using OpenAI Responses API
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-nano",
-        input: [
-          {
-            role: "system",
-            content: [
-              {
-                type: "input_text",
-                text: systemPrompt
-              }
-            ]
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "input_text",
-                text: foodName
-              }
-            ]
-          }
-        ],
-        text: {
-          format: {
-            type: "text"
-          }
-        },
-        reasoning: {},
-        tools: [{
-          type: "function",
-          function: {
-            name: schema.name,
-            description: "A schema for defining food items and their macronutrient details.",
-            parameters: schema.schema,
-            strict: schema.strict
-          }
-        }],
-        temperature: 1,
-        max_output_tokens: 2048,
-        top_p: 1,
-        store: true
-      }),
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY,
     })
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      console.error("Error creating response:", errorData)
-      throw new Error(`Failed to create response: ${errorData.error?.message || "Unknown error"}`)
-    }
+    // Create the response using OpenAI Responses API
+    const response = await openai.responses.create({
+      model: "gpt-4.1-nano",
+      input: [
+        {
+          role: "system",
+          content: [
+            {
+              type: "input_text",
+              text: systemPrompt
+            }
+          ]
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: foodName
+            }
+          ]
+        }
+      ],
+      text: {
+        format: {
+          type: "text"
+        }
+      },
+      reasoning: {},
+      tools: [{
+        type: "function",
+        name: schema.name,
+        description: "A schema for defining food items and their macronutrient details.",
+        parameters: schema.schema,
+        strict: schema.strict
+      }],
+      temperature: 1,
+      max_output_tokens: 2048,
+      top_p: 1,
+      store: true
+    })
 
-    const responseData = await response.json()
-
-    // Extract the nutrition data from the function call
-    const functionCall = responseData.input?.find((item: any) => item.type === "function_call")
+    // Extract the nutrition data from the function call output
+    const functionCall = response.output?.find((item: any) => item.type === "function_call")
+    
     if (functionCall?.arguments) {
       try {
         const nutritionData: NutritionResponse = JSON.parse(functionCall.arguments)
         return NextResponse.json(nutritionData)
       } catch (parseError) {
+        console.error("Failed to parse nutrition data:", parseError)
         throw new Error("Failed to parse nutrition data")
       }
     } else {
-      throw new Error("No function call found in response")
+      console.error("No function call found in response:", JSON.stringify(response.output, null, 2))
+      throw new Error("No function call response found")
     }
   } catch (error: any) {
     console.error("Error in nutrition API:", error)
