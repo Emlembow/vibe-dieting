@@ -85,7 +85,15 @@ export async function POST(request: NextRequest) {
           }
         },
         reasoning: {},
-        tools: [schema],
+        tools: [{
+          type: "function",
+          function: {
+            name: schema.name,
+            description: "A schema for defining food items and their macronutrient details.",
+            parameters: schema.schema,
+            strict: schema.strict
+          }
+        }],
         temperature: 1,
         max_output_tokens: 2048,
         top_p: 1,
