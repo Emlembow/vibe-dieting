@@ -49,15 +49,38 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o",
-        instructions: systemPrompt,
-        input: `Provide nutrition information for: ${foodName}`,
+        model: "gpt-4.1-nano",
+        input: [
+          {
+            role: "system",
+            content: [
+              {
+                type: "input_text",
+                text: systemPrompt
+              }
+            ]
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "input_text",
+                text: foodName
+              }
+            ]
+          }
+        ],
         text: {
           format: {
-            type: "json_schema",
-            json_schema: schema
+            type: "text"
           }
-        }
+        },
+        reasoning: {},
+        tools: [schema],
+        temperature: 1,
+        max_output_tokens: 2048,
+        top_p: 1,
+        store: true
       }),
     })
 
@@ -69,17 +92,17 @@ export async function POST(request: NextRequest) {
 
     const responseData = await response.json()
 
-    // Extract the nutrition data from the response
-    if (responseData.output?.[0]?.content?.[0]?.type === "output_text") {
-      const textContent = responseData.output[0].content[0].text
+    // Extract the nutrition data from the function call
+    const functionCall = responseData.input?.find((item: any) => item.type === "function_call")
+    if (functionCall?.arguments) {
       try {
-        const nutritionData: NutritionResponse = JSON.parse(textContent)
+        const nutritionData: NutritionResponse = JSON.parse(functionCall.arguments)
         return NextResponse.json(nutritionData)
       } catch (parseError) {
         throw new Error("Failed to parse nutrition data")
       }
     } else {
-      throw new Error("Unexpected response format")
+      throw new Error("No function call found in response")
     }
   } catch (error: any) {
     console.error("Error in nutrition API:", error)
