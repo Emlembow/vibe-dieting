@@ -89,19 +89,19 @@ export async function POST(request: NextRequest) {
       store: true
     })
 
-    // Extract the nutrition data from the assistant's output
-    const assistantMessage = (response as any).output?.find((item: any) => item.role === "assistant")
-    if (assistantMessage?.content?.[0]?.type === "output_text") {
+    // Extract the nutrition data from the function call in output
+    const functionCall = (response as any).output?.find((item: any) => item.type === "function_call")
+    if (functionCall?.arguments) {
       try {
-        const nutritionData: NutritionResponse = JSON.parse(assistantMessage.content[0].text)
+        const nutritionData: NutritionResponse = JSON.parse(functionCall.arguments)
         return NextResponse.json(nutritionData)
       } catch (parseError) {
         console.error("Failed to parse nutrition data:", parseError)
         throw new Error("Failed to parse nutrition data")
       }
     } else {
-      console.error("No assistant response found:", JSON.stringify((response as any).output, null, 2))
-      throw new Error("No assistant response found")
+      console.error("No function call found in response:", JSON.stringify((response as any).output, null, 2))
+      throw new Error("No function call found in response")
     }
   } catch (error: any) {
     console.error("Error in nutrition API:", error)
