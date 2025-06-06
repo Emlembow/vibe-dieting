@@ -714,10 +714,8 @@ export default function DashboardPage() {
                               <g>
                                 <polygon 
                                   points={points.join(' ')} 
-                                  fill="#ec4899" 
-                                  stroke="#fff" 
-                                  strokeWidth={2}
-                                  strokeLinejoin="round"
+                                  fill="#fff" 
+                                  stroke="none"
                                 />
                                 <text x={cx} y={cy - 12} textAnchor="middle" fill="#ec4899" fontSize={10} fontWeight="bold">
                                   YOLO
