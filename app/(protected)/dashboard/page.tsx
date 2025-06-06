@@ -706,7 +706,7 @@ export default function DashboardPage() {
                               </g>
                             )
                           }
-                          return null
+                          return <g />
                         }}
                         activeDot={false}
                         connectNulls={false}
