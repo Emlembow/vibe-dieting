@@ -127,18 +127,39 @@ export default function DashboardPage() {
           return
         }
 
+        // Fetch YOLO days for the date range
+        const { data: yoloDaysData, error: yoloDaysError } = await supabase
+          .from("yolo_days")
+          .select("*")
+          .eq("user_id", user.id)
+          .gte("date", startDateStr)
+          .lte("date", endDateStr)
+
+        if (yoloDaysError) {
+          console.error("Error fetching YOLO days:", yoloDaysError)
+        }
+
         // Generate array of all days in the range
         const daysInRange = eachDayOfInterval({ start: startDate, end: endDate })
 
+        // Create a set of YOLO day dates for quick lookup
+        const yoloDayDates = new Set(
+          yoloDaysData?.map((yoloDay) => yoloDay.date) || []
+        )
+
         // Initialize daily totals with zeros
-        const dailyTotals: DailyTotal[] = daysInRange.map((day) => ({
-          date: day,
-          formattedDate: format(day, "EEE"),
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-        }))
+        const dailyTotals: DailyTotal[] = daysInRange.map((day) => {
+          const dateStr = format(day, "yyyy-MM-dd")
+          return {
+            date: day,
+            formattedDate: format(day, "EEE"),
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            isYoloDay: yoloDayDates.has(dateStr),
+          }
+        })
 
         // Sum up the entries for each day
         if (entriesData) {
@@ -295,8 +316,9 @@ export default function DashboardPage() {
   // Prepare chart data
   const chartData = weeklyData.map((day) => ({
     name: day.formattedDate,
-    calories: day.calories || 0,
+    calories: day.isYoloDay ? null : (day.calories || 0),
     goal: macroGoal?.daily_calorie_goal || 0,
+    isYoloDay: day.isYoloDay || false,
   }))
 
   return (
@@ -617,7 +639,33 @@ export default function DashboardPage() {
                         axisLine={false}
                         tickFormatter={(value) => `${value}`}
                       />
-                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartTooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload
+                            if (data.isYoloDay) {
+                              return (
+                                <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                  <div className="grid gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex flex-col">
+                                        <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                          {label}
+                                        </span>
+                                        <span className="font-bold text-pink-500">
+                                          YOLO Day! 🎉
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return <ChartTooltipContent active={active} payload={payload} label={label} />
+                          }
+                          return null
+                        }}
+                      />
                       <ReferenceLine
                         y={macroGoal?.daily_calorie_goal || 0}
                         stroke="hsl(var(--chart-2))"
@@ -634,8 +682,22 @@ export default function DashboardPage() {
                         dataKey="calories"
                         stroke="#3b82f6"
                         strokeWidth={2}
-                        dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                        dot={(props: any) => {
+                          const { cx, cy, payload } = props
+                          if (payload.isYoloDay) {
+                            return (
+                              <g>
+                                <circle cx={cx} cy={cy} r={6} fill="#ec4899" stroke="#fff" strokeWidth={2} />
+                                <text x={cx} y={cy + 20} textAnchor="middle" fill="#ec4899" fontSize={10}>
+                                  YOLO
+                                </text>
+                              </g>
+                            )
+                          }
+                          return <circle cx={cx} cy={cy} r={4} fill="#3b82f6" strokeWidth={2} />
+                        }}
                         activeDot={{ r: 6 }}
+                        connectNulls={false}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -675,4 +737,5 @@ type DailyTotal = {
   protein: number
   carbs: number
   fat: number
+  isYoloDay?: boolean
 }
