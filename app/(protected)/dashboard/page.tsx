@@ -318,29 +318,9 @@ export default function DashboardPage() {
               <Calendar mode="single" selected={date} onSelect={(date) => date && setDate(date)} initialFocus />
             </PopoverContent>
           </Popover>
-          {!yoloDay ? (
-            <>
-              <Button 
-                onClick={() => setIsYoloDayDialogOpen(true)}
-                variant="outline"
-                className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-200 hover:from-pink-500/20 hover:to-purple-500/20 hover:border-pink-300 transition-all duration-200"
-              >
-                <PartyPopper className="mr-2 h-4 w-4 text-pink-500" />
-                YOLO Day
-              </Button>
-              <Button onClick={() => router.push("/add-food")}>
-                <Plus className="mr-2 h-4 w-4" /> Log Food
-              </Button>
-            </>
-          ) : (
-            <Button 
-              onClick={() => setIsYoloDayDialogOpen(true)}
-              disabled
-              variant="outline"
-              className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-pink-300 text-pink-600"
-            >
-              <PartyPopper className="mr-2 h-4 w-4" />
-              YOLO Day Active
+          {!yoloDay && (
+            <Button onClick={() => router.push("/add-food")}>
+              <Plus className="mr-2 h-4 w-4" /> Log Food
             </Button>
           )}
         </div>
@@ -462,9 +442,22 @@ export default function DashboardPage() {
                 <CardTitle>Today's Food Log</CardTitle>
                 <CardDescription className="hidden sm:block">{format(date, "EEEE, MMMM d, yyyy")}</CardDescription>
               </div>
-              <Button variant="outline" size="sm" onClick={() => router.push("/add-food")}>
-                <Plus className="mr-2 h-4 w-4" /> Add Food
-              </Button>
+              <div className="flex items-center gap-2">
+                {!yoloDay && (
+                  <Button 
+                    onClick={() => setIsYoloDayDialogOpen(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-pink-500 hover:bg-pink-500/10"
+                  >
+                    <PartyPopper className="mr-2 h-4 w-4" />
+                    <span className="hidden sm:inline">YOLO Day</span>
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" onClick={() => router.push("/add-food")}>
+                  <Plus className="mr-2 h-4 w-4" /> Add Food
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
