@@ -956,7 +956,7 @@ export default function AddFoodPage() {
                 <CardDescription>Enter nutrition information manually</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="max-w-md mx-auto space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="manual-name">Food Name</Label>
                     <Input
@@ -978,7 +978,7 @@ export default function AddFoodPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="manual-protein">Protein (g)</Label>
                       <Input
