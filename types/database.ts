@@ -33,6 +33,14 @@ export interface FoodEntry {
   created_at: string
 }
 
+export interface YoloDay {
+  id: string
+  user_id: string
+  date: string
+  reason: string | null
+  created_at: string
+}
+
 export interface NutritionResponse {
   foodDetails: {
     name: string

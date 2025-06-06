@@ -3,19 +3,21 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "@/context/auth-context"
 import { supabase } from "@/lib/supabase"
-import type { FoodEntry, MacroGoal } from "@/types/database"
+import type { FoodEntry, MacroGoal, YoloDay } from "@/types/database"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useRouter } from "next/navigation"
 import { format, subDays, parseISO, eachDayOfInterval } from "date-fns"
-import { CalendarIcon, Plus, Trash2, ArrowRight, Settings, Clock, Pencil } from "lucide-react"
+import { CalendarIcon, Plus, Trash2, ArrowRight, Settings, Clock, Pencil, PartyPopper } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useToast } from "@/components/ui/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { EditFoodDialog } from "@/components/edit-food-dialog"
+import { YoloDayDialog } from "@/components/yolo-day-dialog"
+import { YoloDayDisplay } from "@/components/yolo-day-display"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
@@ -33,6 +35,10 @@ export default function DashboardPage() {
   // Edit dialog state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedFoodEntry, setSelectedFoodEntry] = useState<FoodEntry | null>(null)
+
+  // YOLO Day state
+  const [yoloDay, setYoloDay] = useState<YoloDay | null>(null)
+  const [isYoloDayDialogOpen, setIsYoloDayDialogOpen] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -55,19 +61,36 @@ export default function DashboardPage() {
           setMacroGoal(goalData || null)
         }
 
-        // Fetch food entries for the selected date
+        // Check if this date is a YOLO Day
         const formattedDate = format(date, "yyyy-MM-dd")
-        const { data: entriesData, error: entriesError } = await supabase
-          .from("food_entries")
+        const { data: yoloDayData, error: yoloDayError } = await supabase
+          .from("yolo_days")
           .select("*")
           .eq("user_id", user.id)
           .eq("date", formattedDate)
-          .order("created_at", { ascending: false }) // Newest first
+          .single()
 
-        if (entriesError) {
-          console.error("Error fetching food entries:", entriesError)
+        if (yoloDayError && yoloDayError.code !== "PGRST116") {
+          console.error("Error fetching YOLO day:", yoloDayError)
+        }
+        setYoloDay(yoloDayData || null)
+
+        // Fetch food entries for the selected date (only if not a YOLO day)
+        if (!yoloDayData) {
+          const { data: entriesData, error: entriesError } = await supabase
+            .from("food_entries")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("date", formattedDate)
+            .order("created_at", { ascending: false }) // Newest first
+
+          if (entriesError) {
+            console.error("Error fetching food entries:", entriesError)
+          } else {
+            setFoodEntries(entriesData || [])
+          }
         } else {
-          setFoodEntries(entriesData || [])
+          setFoodEntries([]) // Clear food entries for YOLO days
         }
       } finally {
         setIsLoading(false)
@@ -173,6 +196,75 @@ export default function DashboardPage() {
     setFoodEntries(foodEntries.map((entry) => (entry.id === updatedFood.id ? updatedFood : entry)))
   }
 
+  const handleCreateYoloDay = async (reason?: string) => {
+    if (!user) return
+
+    try {
+      const formattedDate = format(date, "yyyy-MM-dd")
+      const { data, error } = await supabase
+        .from("yolo_days")
+        .insert({
+          user_id: user.id,
+          date: formattedDate,
+          reason: reason || null,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setYoloDay(data)
+      setFoodEntries([]) // Clear any existing food entries for this day
+      setIsYoloDayDialogOpen(false)
+
+      toast({
+        title: "YOLO Day declared! 🎉",
+        description: "Enjoy your day off from tracking. You deserve it!",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create YOLO day",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleRemoveYoloDay = async () => {
+    if (!user || !yoloDay) return
+
+    try {
+      const { error } = await supabase.from("yolo_days").delete().eq("id", yoloDay.id)
+
+      if (error) throw error
+
+      setYoloDay(null)
+      // Refresh food entries for this date
+      const formattedDate = format(date, "yyyy-MM-dd")
+      const { data: entriesData, error: entriesError } = await supabase
+        .from("food_entries")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", formattedDate)
+        .order("created_at", { ascending: false })
+
+      if (!entriesError) {
+        setFoodEntries(entriesData || [])
+      }
+
+      toast({
+        title: "Back to tracking!",
+        description: "Ready to log your nutrition again.",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove YOLO day",
+        variant: "destructive",
+      })
+    }
+  }
+
   // Calculate totals
   const totalCalories = foodEntries.reduce((sum, entry) => sum + entry.calories, 0)
   const totalProtein = foodEntries.reduce((sum, entry) => sum + Number(entry.protein_grams), 0)
@@ -226,9 +318,31 @@ export default function DashboardPage() {
               <Calendar mode="single" selected={date} onSelect={(date) => date && setDate(date)} initialFocus />
             </PopoverContent>
           </Popover>
-          <Button onClick={() => router.push("/add-food")}>
-            <Plus className="mr-2 h-4 w-4" /> Log Food
-          </Button>
+          {!yoloDay ? (
+            <>
+              <Button 
+                onClick={() => setIsYoloDayDialogOpen(true)}
+                variant="outline"
+                className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-200 hover:from-pink-500/20 hover:to-purple-500/20 hover:border-pink-300 transition-all duration-200"
+              >
+                <PartyPopper className="mr-2 h-4 w-4 text-pink-500" />
+                YOLO Day
+              </Button>
+              <Button onClick={() => router.push("/add-food")}>
+                <Plus className="mr-2 h-4 w-4" /> Log Food
+              </Button>
+            </>
+          ) : (
+            <Button 
+              onClick={() => setIsYoloDayDialogOpen(true)}
+              disabled
+              variant="outline"
+              className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-pink-300 text-pink-600"
+            >
+              <PartyPopper className="mr-2 h-4 w-4" />
+              YOLO Day Active
+            </Button>
+          )}
         </div>
       </div>
 
@@ -249,6 +363,12 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+      ) : yoloDay ? (
+        <YoloDayDisplay 
+          yoloDay={yoloDay} 
+          onRemove={handleRemoveYoloDay} 
+          date={date} 
+        />
       ) : (
         <>
           {/* Main Summary Card - More Compact for Mobile */}
@@ -542,6 +662,14 @@ export default function DashboardPage() {
         }}
         foodEntry={selectedFoodEntry}
         onFoodUpdated={handleFoodUpdated}
+      />
+
+      {/* YOLO Day Dialog */}
+      <YoloDayDialog
+        isOpen={isYoloDayDialogOpen}
+        onClose={() => setIsYoloDayDialogOpen(false)}
+        onConfirm={handleCreateYoloDay}
+        date={date}
       />
     </div>
   )
