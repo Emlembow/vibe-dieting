@@ -1,6 +1,5 @@
 import React, { ReactElement } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
-import { AuthProvider } from '@/context/auth-context'
 import { User } from '@supabase/supabase-js'
 
 // Mock user for testing
@@ -12,47 +11,28 @@ export const mockUser: User = {
   aud: 'authenticated',
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
-  confirmation_sent_at: null,
+  confirmation_sent_at: undefined,
   confirmed_at: new Date().toISOString(),
-  recovery_sent_at: null,
+  recovery_sent_at: undefined,
   email_confirmed_at: new Date().toISOString(),
-  phone: null,
-  phone_confirmed_at: null,
+  phone: undefined,
+  phone_confirmed_at: undefined,
   last_sign_in_at: new Date().toISOString(),
   role: 'authenticated',
 }
 
-interface TestAuthProviderProps {
-  children: React.ReactNode
-  user?: User | null
-  isLoading?: boolean
-}
-
-// Test wrapper for auth context
-const TestAuthProvider: React.FC<TestAuthProviderProps> = ({ 
-  children, 
-  user = mockUser,
-  isLoading = false 
-}) => {
-  return (
-    <AuthProvider value={{
-      user,
-      isLoading,
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      signOut: jest.fn(),
-    }}>
-      {children}
-    </AuthProvider>
-  )
+// Simple test wrapper that just renders children
+// The AuthProvider is mocked in jest.setup.js
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <div data-testid="test-wrapper">{children}</div>
 }
 
 // All providers that tests might need
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
-    <TestAuthProvider>
+    <TestWrapper>
       {children}
-    </TestAuthProvider>
+    </TestWrapper>
   )
 }
 
