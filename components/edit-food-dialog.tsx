@@ -242,3 +242,10 @@ export function EditFoodDialog({ isOpen, onClose, foodEntry, onFoodUpdated }: Ed
     </Dialog>
   )
 }
+
+interface EditFoodDialogProps {
+  isOpen: boolean
+  onClose: () => void
+  foodEntry: FoodEntry | null
+  onFoodUpdated: (updatedFood: FoodEntry) => void
+}

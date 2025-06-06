@@ -10,8 +10,15 @@ import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { registerUser } from "@/app/actions/auth"
 import { IceCream, CheckCircle, Loader2 } from "lucide-react"
+import { registerSchema, type RegisterFormData } from "@/lib/validations"
+import { z } from "zod"
 
 export default function RegisterPage() {
+  const [formData, setFormData] = useState<RegisterFormData>({
+    username: "",
+    email: "",
+    password: "",
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [state, setState] = useState<{
     success: boolean
@@ -20,7 +27,34 @@ export default function RegisterPage() {
   }>({
     success: false,
   })
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({})
   const router = useRouter()
+
+  const handleInputChange = (field: keyof RegisterFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear field error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({ ...prev, [field]: undefined }))
+    }
+  }
+
+  const validateForm = (): boolean => {
+    try {
+      registerSchema.parse(formData)
+      setFieldErrors({})
+      return true
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Partial<Record<keyof RegisterFormData, string>> = {}
+        error.errors.forEach((err) => {
+          const field = err.path[0] as keyof RegisterFormData
+          errors[field] = err.message
+        })
+        setFieldErrors(errors)
+      }
+      return false
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -28,11 +62,20 @@ export default function RegisterPage() {
     setIsLoading(true)
     setState({ success: false }) // Reset state
     
-    const formData = new FormData(e.currentTarget)
+    // Validate form before submission
+    if (!validateForm()) {
+      setIsLoading(false)
+      return
+    }
+    
+    const form = new FormData()
+    form.append("username", formData.username)
+    form.append("email", formData.email)
+    form.append("password", formData.password)
     
     try {
       console.log("Calling registerUser...")
-      const result = await registerUser(formData)
+      const result = await registerUser(form)
       console.log("Registration result:", result)
       setState(result)
     } catch (error) {
@@ -82,9 +125,14 @@ export default function RegisterPage() {
                 id="username" 
                 name="username" 
                 placeholder="johndoe" 
-                required 
+                value={formData.username}
+                onChange={(e) => handleInputChange("username", e.target.value)}
+                className={fieldErrors.username ? "border-destructive focus-visible:ring-destructive" : ""}
                 disabled={isLoading || state.success}
               />
+              {fieldErrors.username && (
+                <p className="text-sm text-destructive">{fieldErrors.username}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -93,9 +141,14 @@ export default function RegisterPage() {
                 name="email" 
                 type="email" 
                 placeholder="name@example.com" 
-                required 
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                className={fieldErrors.email ? "border-destructive focus-visible:ring-destructive" : ""}
                 disabled={isLoading || state.success}
               />
+              {fieldErrors.email && (
+                <p className="text-sm text-destructive">{fieldErrors.email}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -103,11 +156,15 @@ export default function RegisterPage() {
                 id="password" 
                 name="password" 
                 type="password" 
-                required 
-                minLength={6} 
+                value={formData.password}
+                onChange={(e) => handleInputChange("password", e.target.value)}
+                className={fieldErrors.password ? "border-destructive focus-visible:ring-destructive" : ""}
                 disabled={isLoading || state.success}
               />
-              <p className="text-xs text-muted-foreground">Password must be at least 6 characters long</p>
+              {fieldErrors.password && (
+                <p className="text-sm text-destructive">{fieldErrors.password}</p>
+              )}
+              <p className="text-xs text-muted-foreground">Password must be at least 8 characters with uppercase, lowercase, and a number</p>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">

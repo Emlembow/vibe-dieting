@@ -26,18 +26,24 @@ describe('Login Page', () => {
     expect(screen.getByText(/don't have an account/i)).toBeInTheDocument()
   })
 
-  it('validates required fields', async () => {
+  it('validates required fields with Zod', async () => {
     render(<LoginPage />)
+    
+    // Clear the fields first (they might have default values)
+    const emailInput = screen.getByLabelText('Email')
+    const passwordInput = screen.getByLabelText('Password')
+    
+    fireEvent.change(emailInput, { target: { value: '' } })
+    fireEvent.change(passwordInput, { target: { value: '' } })
     
     const submitButton = screen.getByRole('button', { name: /sign in/i })
     fireEvent.click(submitButton)
 
-    // HTML5 validation should prevent submission with empty fields
-    const emailInput = screen.getByLabelText('Email') as HTMLInputElement
-    const passwordInput = screen.getByLabelText('Password') as HTMLInputElement
-    
-    expect(emailInput.validity.valid).toBe(false)
-    expect(passwordInput.validity.valid).toBe(false)
+    // Zod validation should show error messages for empty fields
+    await waitFor(() => {
+      expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument()
+      expect(screen.getByText('Password must be at least 6 characters')).toBeInTheDocument()
+    })
   })
 
   it('handles successful login', async () => {
@@ -103,7 +109,7 @@ describe('Login Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to sign in')).toBeInTheDocument()
+      expect(screen.getByText('Network error')).toBeInTheDocument()
     })
   })
 

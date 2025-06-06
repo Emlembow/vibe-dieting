@@ -1,11 +1,5 @@
 import { IceCream } from "lucide-react"
 
-interface VibeMascotProps {
-  size?: "xs" | "sm" | "md" | "lg" | "xl"
-  withText?: boolean
-  className?: string
-}
-
 const sizeMap = {
   xs: { icon: 16, container: 24, text: "text-sm" },
   sm: { icon: 20, container: 32, text: "text-base" },
@@ -33,4 +27,10 @@ export function VibeMascot({ size = "md", withText = false, className = "" }: Vi
       )}
     </div>
   )
+}
+
+interface VibeMascotProps {
+  size?: "xs" | "sm" | "md" | "lg" | "xl"
+  withText?: boolean
+  className?: string
 }

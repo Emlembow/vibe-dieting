@@ -80,7 +80,7 @@ describe('Dashboard Page', () => {
   it('renders dashboard with loading state initially', () => {
     render(<DashboardPage />)
     
-    expect(screen.getByText(/today's macros/i)).toBeInTheDocument()
+    expect(screen.getByText(/Daily Summary/i)).toBeInTheDocument()
     expect(screen.getByText(/recent entries/i)).toBeInTheDocument()
   })
 
@@ -284,6 +284,6 @@ describe('Dashboard Page', () => {
 
     render(<DashboardPage />)
 
-    expect(screen.getByText(/today's macros/i)).toBeInTheDocument()
+    expect(screen.getByText(/Daily Summary/i)).toBeInTheDocument()
   })
 })

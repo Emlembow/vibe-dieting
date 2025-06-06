@@ -12,24 +12,61 @@ import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { supabase } from "@/lib/supabase"
 import { IceCream } from "lucide-react"
+import { loginSchema, type LoginFormData } from "@/lib/validations"
+import { z } from "zod"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
+    password: "",
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({})
   const router = useRouter()
+
+  const handleInputChange = (field: keyof LoginFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear field error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({ ...prev, [field]: undefined }))
+    }
+  }
+
+  const validateForm = (): boolean => {
+    try {
+      loginSchema.parse(formData)
+      setFieldErrors({})
+      return true
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Partial<Record<keyof LoginFormData, string>> = {}
+        error.errors.forEach((err) => {
+          const field = err.path[0] as keyof LoginFormData
+          errors[field] = err.message
+        })
+        setFieldErrors(errors)
+      }
+      return false
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setErrorMessage(null)
 
+    // Validate form before submission
+    if (!validateForm()) {
+      setIsLoading(false)
+      return
+    }
+
     try {
       // Direct Supabase auth call
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
       })
 
       if (error) {
@@ -74,10 +111,13 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                className={fieldErrors.email ? "border-destructive focus-visible:ring-destructive" : ""}
               />
+              {fieldErrors.email && (
+                <p className="text-sm text-destructive">{fieldErrors.email}</p>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -86,10 +126,13 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                value={formData.password}
+                onChange={(e) => handleInputChange("password", e.target.value)}
+                className={fieldErrors.password ? "border-destructive focus-visible:ring-destructive" : ""}
               />
+              {fieldErrors.password && (
+                <p className="text-sm text-destructive">{fieldErrors.password}</p>
+              )}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">

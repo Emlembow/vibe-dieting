@@ -1,10 +1,5 @@
 import { cn } from "@/lib/utils"
 
-interface LoadingSpinnerProps {
-  className?: string
-  size?: "sm" | "md" | "lg"
-}
-
 export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: "h-4 w-4",
@@ -32,4 +27,9 @@ export function LoadingPage() {
       </div>
     </div>
   )
+}
+
+interface LoadingSpinnerProps {
+  className?: string
+  size?: "sm" | "md" | "lg"
 }

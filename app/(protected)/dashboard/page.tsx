@@ -19,15 +19,6 @@ import { EditFoodDialog } from "@/components/edit-food-dialog"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-type DailyTotal = {
-  date: Date
-  formattedDate: string
-  calories: number
-  protein: number
-  carbs: number
-  fat: number
-}
-
 export default function DashboardPage() {
   const { user } = useAuth()
   const [macroGoal, setMacroGoal] = useState<MacroGoal | null>(null)
@@ -554,4 +545,13 @@ export default function DashboardPage() {
       />
     </div>
   )
+}
+
+type DailyTotal = {
+  date: Date
+  formattedDate: string
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
 }

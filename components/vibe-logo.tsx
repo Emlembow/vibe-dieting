@@ -1,10 +1,5 @@
 import { Sparkles } from "lucide-react"
 
-interface VibeLogoProps {
-  size?: "sm" | "md" | "lg"
-  showText?: boolean
-}
-
 export function VibeLogo({ size = "md", showText = true }: VibeLogoProps) {
   const sizeClasses = {
     sm: "h-8 w-8",
@@ -34,4 +29,9 @@ export function VibeLogo({ size = "md", showText = true }: VibeLogoProps) {
       )}
     </div>
   )
+}
+
+interface VibeLogoProps {
+  size?: "sm" | "md" | "lg"
+  showText?: boolean
 }

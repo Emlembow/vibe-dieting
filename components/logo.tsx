@@ -1,14 +1,5 @@
 import Image from "next/image"
 
-type LogoVariant = "default" | "icon" | "horizontal" | "vertical" | "dark" | "light"
-type LogoSize = "xs" | "sm" | "md" | "lg" | "xl"
-
-interface LogoProps {
-  variant?: LogoVariant
-  size?: LogoSize
-  className?: string
-}
-
 const sizeMap = {
   xs: { width: 24, height: 24 },
   sm: { width: 32, height: 32 },
@@ -35,4 +26,13 @@ export function Logo({ variant = "default", size = "md", className = "" }: LogoP
       <Image src={logoSrc || "/placeholder.svg"} alt="Vibe Dieting Logo" width={width} height={height} priority />
     </div>
   )
+}
+
+type LogoVariant = "default" | "icon" | "horizontal" | "vertical" | "dark" | "light"
+type LogoSize = "xs" | "sm" | "md" | "lg" | "xl"
+
+interface LogoProps {
+  variant?: LogoVariant
+  size?: LogoSize
+  className?: string
 }

@@ -1,8 +1,3 @@
-interface HighlightMatchProps {
-  text: string
-  highlight: string
-}
-
 export function HighlightMatch({ text, highlight }: HighlightMatchProps) {
   if (!highlight.trim() || !text) {
     return <>{text}</>
@@ -24,4 +19,9 @@ export function HighlightMatch({ text, highlight }: HighlightMatchProps) {
       )}
     </>
   )
+}
+
+interface HighlightMatchProps {
+  text: string
+  highlight: string
 }

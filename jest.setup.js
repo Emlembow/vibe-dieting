@@ -27,30 +27,42 @@ jest.mock('next/navigation', () => {
   }
 })
 
-// Mock Supabase client
-jest.mock('@/lib/supabase', () => ({
-  supabase: {
-    auth: {
-      signInWithPassword: jest.fn(),
-      signUp: jest.fn(),
-      signOut: jest.fn(),
-      getSession: jest.fn(),
-      onAuthStateChange: jest.fn(),
-    },
-    from: jest.fn(() => ({
+// Mock Supabase client with proper promise returns
+jest.mock('@/lib/supabase', () => {
+  // Create a chainable mock that implements thenable pattern
+  const createMockQueryBuilder = () => {
+    const mockBuilder = {
       select: jest.fn().mockReturnThis(),
       insert: jest.fn().mockReturnThis(),
       update: jest.fn().mockReturnThis(),
       delete: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({ data: null, error: null }),
       order: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
-    })),
-  },
-}))
+      // Make it thenable for async/await
+      then: jest.fn((resolve) => resolve({ data: null, error: null })),
+      catch: jest.fn(),
+    }
+    
+    return mockBuilder
+  }
+
+  return {
+    supabase: {
+      auth: {
+        signInWithPassword: jest.fn().mockResolvedValue({ data: null, error: null }),
+        signUp: jest.fn().mockResolvedValue({ data: null, error: null }),
+        signOut: jest.fn().mockResolvedValue({ error: null }),
+        getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+        onAuthStateChange: jest.fn(),
+      },
+      from: jest.fn(() => createMockQueryBuilder()),
+    },
+  }
+})
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
