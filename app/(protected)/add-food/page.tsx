@@ -72,6 +72,8 @@ export default function AddFoodPage() {
   // Add a new state for the recent foods search
   const [recentFoodsSearch, setRecentFoodsSearch] = useState("")
   const [filteredRecentFoods, setFilteredRecentFoods] = useState<SmartFoodSuggestion[]>([])
+  const [allFoodHistory, setAllFoodHistory] = useState<SmartFoodSuggestion[]>([])
+  const [isSearchingHistory, setIsSearchingHistory] = useState(false)
 
   // Fetch and sort recent foods with smart algorithm
   useEffect(() => {
@@ -183,47 +185,101 @@ export default function AddFoodPage() {
     fetchRecentFoods()
   }, [user])
 
-  // Add this useEffect after the existing useEffect for fetching recent foods
+  // Fetch all food history when user starts searching
   useEffect(() => {
-    if (recentFoods.length === 0) {
-      setFilteredRecentFoods([])
+    if (!user || !recentFoodsSearch.trim()) {
+      // If no search, show smart suggestions
+      setFilteredRecentFoods(recentFoods)
+      setAllFoodHistory([])
       return
     }
 
+    const fetchAllFoodHistory = async () => {
+      setIsSearchingHistory(true)
+      try {
+        // Fetch ALL food entries (not just last 30 days)
+        const { data: entries, error } = await supabase
+          .from("food_entries")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+
+        if (error) throw error
+
+        // Group by food name
+        const foodGroups = new Map<string, FoodEntry[]>()
+        entries?.forEach((entry: FoodEntry) => {
+          const key = entry.name.toLowerCase()
+          if (!foodGroups.has(key)) {
+            foodGroups.set(key, [])
+          }
+          foodGroups.get(key)!.push(entry)
+        })
+
+        // Convert to suggestions with frequency
+        const allFoods: SmartFoodSuggestion[] = []
+        foodGroups.forEach((entries, foodName) => {
+          const mostRecent = entries[0]
+          const frequency = entries.length
+
+          allFoods.push({
+            ...mostRecent,
+            score: frequency, // Use frequency as score for sorting
+            reason: `Added ${frequency} time${frequency > 1 ? 's' : ''}`,
+            lastEaten: format(new Date(mostRecent.created_at), "MMM d"),
+            frequency,
+          })
+        })
+
+        setAllFoodHistory(allFoods)
+      } catch (error) {
+        console.error("Error fetching food history:", error)
+      } finally {
+        setIsSearchingHistory(false)
+      }
+    }
+
+    // Debounce the search
+    const timeoutId = setTimeout(fetchAllFoodHistory, 300)
+    return () => clearTimeout(timeoutId)
+  }, [user, recentFoodsSearch])
+
+  // Filter food history based on search
+  useEffect(() => {
     if (!recentFoodsSearch.trim()) {
       setFilteredRecentFoods(recentFoods)
       return
     }
 
-    // Filter foods based on search term
     const searchTerm = recentFoodsSearch.toLowerCase().trim()
-    const filtered = recentFoods.filter(
+    const foodsToFilter = allFoodHistory.length > 0 ? allFoodHistory : recentFoods
+
+    // Filter foods based on search term
+    const filtered = foodsToFilter.filter(
       (food) =>
         food.name.toLowerCase().includes(searchTerm) ||
-        (food.description && food.description.toLowerCase().includes(searchTerm)),
+        (food.description && food.description.toLowerCase().includes(searchTerm))
     )
 
-    // Re-score the filtered foods to prioritize commonly eaten ones
-    const rescored = filtered.map((food) => {
-      // Boost score for frequently eaten foods when searching
-      // Apply a stronger frequency boost during search
-      const frequencyBoost = Math.pow(food.frequency, 1.5) * 0.15
+    // Score and sort filtered results
+    const scored = filtered.map((food) => {
+      let score = food.frequency // Base score is frequency
 
       // Boost score for exact name matches
-      const exactMatchBoost = food.name.toLowerCase() === searchTerm ? 0.3 : 0
-
-      // Boost score for name starts with search term
-      const startsWithBoost = food.name.toLowerCase().startsWith(searchTerm) ? 0.1 : 0
-
-      return {
-        ...food,
-        score: food.score + frequencyBoost + exactMatchBoost + startsWithBoost,
+      if (food.name.toLowerCase() === searchTerm) {
+        score += 1000
       }
+      // Boost score for name starts with search term
+      else if (food.name.toLowerCase().startsWith(searchTerm)) {
+        score += 500
+      }
+
+      return { ...food, score }
     })
 
-    // Sort by the new scores
-    setFilteredRecentFoods(rescored.sort((a, b) => b.score - a.score))
-  }, [recentFoods, recentFoodsSearch])
+    // Sort by score (highest first)
+    setFilteredRecentFoods(scored.sort((a, b) => b.score - a.score))
+  }, [recentFoods, allFoodHistory, recentFoodsSearch])
 
   const handleSearch = async () => {
     if (!foodName.trim()) {
@@ -604,10 +660,12 @@ export default function AddFoodPage() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
-                  Smart Suggestions
+                  {recentFoodsSearch ? 'Search Results' : 'Smart Suggestions'}
                 </CardTitle>
                 <CardDescription>
-                  Foods you might want to add based on your eating patterns and the current time
+                  {recentFoodsSearch 
+                    ? `Searching all your food history for "${recentFoodsSearch}"`
+                    : 'Foods you might want to add based on your eating patterns and the current time'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -630,20 +688,25 @@ export default function AddFoodPage() {
                     <div className="relative mb-4">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Search your recent foods..."
+                        placeholder="Search all your food history..."
                         value={recentFoodsSearch}
                         onChange={(e) => setRecentFoodsSearch(e.target.value)}
                         className="pl-9"
                       />
                       {recentFoodsSearch && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                          onClick={() => setRecentFoodsSearch("")}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <>
+                          {isSearchingHistory && (
+                            <Loader2 className="absolute right-10 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                            onClick={() => setRecentFoodsSearch("")}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </>
                       )}
                     </div>
 
