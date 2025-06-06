@@ -956,29 +956,30 @@ export default function AddFoodPage() {
                 <CardDescription>Enter nutrition information manually</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="max-w-md mx-auto space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="manual-name">Food Name</Label>
-                    <Input
-                      id="manual-name"
-                      value={manualEntry.name}
-                      onChange={(e) => setManualEntry({ ...manualEntry, name: e.target.value })}
-                      placeholder="e.g., Grilled chicken breast"
-                    />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="manual-name">Food Name</Label>
+                      <Input
+                        id="manual-name"
+                        value={manualEntry.name}
+                        onChange={(e) => setManualEntry({ ...manualEntry, name: e.target.value })}
+                        placeholder="e.g., Grilled chicken breast"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="manual-calories">Calories</Label>
+                      <Input
+                        id="manual-calories"
+                        type="number"
+                        value={manualEntry.calories}
+                        onChange={(e) => setManualEntry({ ...manualEntry, calories: e.target.value })}
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="manual-calories">Calories</Label>
-                    <Input
-                      id="manual-calories"
-                      type="number"
-                      value={manualEntry.calories}
-                      onChange={(e) => setManualEntry({ ...manualEntry, calories: e.target.value })}
-                      placeholder="0"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="manual-protein">Protein (g)</Label>
                       <Input
@@ -987,7 +988,6 @@ export default function AddFoodPage() {
                         value={manualEntry.protein}
                         onChange={(e) => setManualEntry({ ...manualEntry, protein: e.target.value })}
                         placeholder="0"
-                        className="h-9"
                       />
                     </div>
                     <div className="space-y-2">
@@ -998,7 +998,6 @@ export default function AddFoodPage() {
                         value={manualEntry.carbs}
                         onChange={(e) => setManualEntry({ ...manualEntry, carbs: e.target.value })}
                         placeholder="0"
-                        className="h-9"
                       />
                     </div>
                     <div className="space-y-2">
@@ -1009,24 +1008,25 @@ export default function AddFoodPage() {
                         value={manualEntry.fat}
                         onChange={(e) => setManualEntry({ ...manualEntry, fat: e.target.value })}
                         placeholder="0"
-                        className="h-9"
                       />
                     </div>
                   </div>
 
-                  <Button onClick={handleManualSave} disabled={isSaving} className="w-full mt-4">
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add to Food Log
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex gap-2 pt-2">
+                    <Button onClick={handleManualSave} disabled={isSaving} className="flex-1">
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add to Food Log
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
