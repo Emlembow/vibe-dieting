@@ -58,12 +58,12 @@ export function YoloDayDisplay({ yoloDay, onRemove, date }: YoloDayDisplayProps)
             </div>
           )}
 
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-950/30 dark:to-purple-950/30 rounded-lg p-6 space-y-3">
-            <h3 className="font-semibold text-lg flex items-center gap-2 justify-center">
+          <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg p-6 space-y-3 border border-gray-700">
+            <h3 className="font-semibold text-lg flex items-center gap-2 justify-center text-white">
               <Sparkles className="h-5 w-5 text-purple-500" />
               No tracking, no stress, just vibes
             </h3>
-            <div className="text-muted-foreground space-y-2">
+            <div className="text-gray-300 space-y-2">
               <p className="text-sm">
                 🌟 Rest and enjoyment are part of a healthy lifestyle
               </p>

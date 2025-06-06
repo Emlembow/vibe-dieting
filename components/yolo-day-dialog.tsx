@@ -119,12 +119,12 @@ export function YoloDayDialog({ isOpen, onClose, onConfirm, date }: YoloDayDialo
             />
           </div>
 
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-950/20 dark:to-purple-950/20 rounded-lg p-4 border">
-            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+          <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg p-4 border border-gray-700">
+            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2 text-white">
               <Heart className="h-4 w-4 text-pink-500" />
               Remember:
             </h4>
-            <ul className="text-sm text-muted-foreground space-y-1">
+            <ul className="text-sm text-gray-300 space-y-1">
               <li>• One day doesn't define your journey</li>
               <li>• Rest and enjoyment are part of a healthy lifestyle</li>
               <li>• You can always come back tomorrow refreshed!</li>
