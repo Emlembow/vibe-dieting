@@ -476,10 +476,10 @@ export default function AddFoodPage() {
   // For manual entry if API fails
   const [manualEntry, setManualEntry] = useState({
     name: "",
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
+    calories: "",
+    protein: "",
+    carbs: "",
+    fat: "",
   })
 
   const handleManualSave = async () => {
@@ -509,12 +509,12 @@ export default function AddFoodPage() {
         date: format(date, "yyyy-MM-dd"),
         name: manualEntry.name,
         description: `Manually entered`,
-        calories: manualEntry.calories,
-        protein_grams: manualEntry.protein,
-        carbs_total_grams: manualEntry.carbs,
+        calories: Number(manualEntry.calories) || 0,
+        protein_grams: Number(manualEntry.protein) || 0,
+        carbs_total_grams: Number(manualEntry.carbs) || 0,
         carbs_fiber_grams: 0,
         carbs_sugar_grams: 0,
-        fat_total_grams: manualEntry.fat,
+        fat_total_grams: Number(manualEntry.fat) || 0,
         fat_saturated_grams: 0,
       })
 
@@ -910,7 +910,8 @@ export default function AddFoodPage() {
                       id="manual-calories"
                       type="number"
                       value={manualEntry.calories}
-                      onChange={(e) => setManualEntry({ ...manualEntry, calories: Number(e.target.value) })}
+                      onChange={(e) => setManualEntry({ ...manualEntry, calories: e.target.value })}
+                      placeholder="0"
                     />
                   </div>
 
@@ -921,7 +922,8 @@ export default function AddFoodPage() {
                         id="manual-protein"
                         type="number"
                         value={manualEntry.protein}
-                        onChange={(e) => setManualEntry({ ...manualEntry, protein: Number(e.target.value) })}
+                        onChange={(e) => setManualEntry({ ...manualEntry, protein: e.target.value })}
+                        placeholder="0"
                         className="h-9"
                       />
                     </div>
@@ -931,7 +933,8 @@ export default function AddFoodPage() {
                         id="manual-carbs"
                         type="number"
                         value={manualEntry.carbs}
-                        onChange={(e) => setManualEntry({ ...manualEntry, carbs: Number(e.target.value) })}
+                        onChange={(e) => setManualEntry({ ...manualEntry, carbs: e.target.value })}
+                        placeholder="0"
                         className="h-9"
                       />
                     </div>
@@ -941,28 +944,28 @@ export default function AddFoodPage() {
                         id="manual-fat"
                         type="number"
                         value={manualEntry.fat}
-                        onChange={(e) => setManualEntry({ ...manualEntry, fat: Number(e.target.value) })}
+                        onChange={(e) => setManualEntry({ ...manualEntry, fat: e.target.value })}
+                        placeholder="0"
                         className="h-9"
                       />
                     </div>
                   </div>
+
+                  <Button onClick={handleManualSave} disabled={isSaving} className="w-full mt-4">
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add to Food Log
+                      </>
+                    )}
+                  </Button>
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button onClick={handleManualSave} disabled={isSaving} className="w-full">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add to Food Log
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>
