@@ -697,10 +697,29 @@ export default function DashboardPage() {
                         dot={(props: any) => {
                           const { cx, cy, payload } = props
                           if (payload.yoloDayMarker !== null) {
+                            // Create a star shape
+                            const size = 8
+                            const innerRadius = size * 0.4
+                            const points = []
+                            
+                            for (let i = 0; i < 10; i++) {
+                              const angle = (i * Math.PI) / 5 - Math.PI / 2
+                              const radius = i % 2 === 0 ? size : innerRadius
+                              const x = cx + radius * Math.cos(angle)
+                              const y = cy + radius * Math.sin(angle)
+                              points.push(`${x},${y}`)
+                            }
+                            
                             return (
                               <g>
-                                <circle cx={cx} cy={cy} r={6} fill="#ec4899" stroke="#fff" strokeWidth={2} />
-                                <text x={cx} y={cy - 10} textAnchor="middle" fill="#ec4899" fontSize={10} fontWeight="bold">
+                                <polygon 
+                                  points={points.join(' ')} 
+                                  fill="#ec4899" 
+                                  stroke="#fff" 
+                                  strokeWidth={2}
+                                  strokeLinejoin="round"
+                                />
+                                <text x={cx} y={cy - 12} textAnchor="middle" fill="#ec4899" fontSize={10} fontWeight="bold">
                                   YOLO
                                 </text>
                               </g>
