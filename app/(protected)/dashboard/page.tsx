@@ -317,6 +317,7 @@ export default function DashboardPage() {
   const chartData = weeklyData.map((day) => ({
     name: day.formattedDate,
     calories: day.isYoloDay ? null : (day.calories || 0),
+    yoloDayMarker: day.isYoloDay ? (macroGoal?.daily_calorie_goal || 2000) : null,
     goal: macroGoal?.daily_calorie_goal || 0,
     isYoloDay: day.isYoloDay || false,
   }))
@@ -638,6 +639,7 @@ export default function DashboardPage() {
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(value) => `${value}`}
+                        domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.1)]}
                       />
                       <ChartTooltip 
                         content={({ active, payload, label }) => {
@@ -668,12 +670,13 @@ export default function DashboardPage() {
                       />
                       <ReferenceLine
                         y={macroGoal?.daily_calorie_goal || 0}
-                        stroke="hsl(var(--chart-2))"
-                        strokeDasharray="3 3"
+                        stroke="#eab308"
+                        strokeDasharray="5 5"
+                        strokeWidth={2}
                         label={{
                           value: "Goal",
                           position: "right",
-                          fill: "hsl(var(--chart-2))",
+                          fill: "#eab308",
                           fontSize: 12,
                         }}
                       />
@@ -682,21 +685,30 @@ export default function DashboardPage() {
                         dataKey="calories"
                         stroke="#3b82f6"
                         strokeWidth={2}
+                        dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6 }}
+                        connectNulls={false}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="yoloDayMarker"
+                        stroke="transparent"
+                        strokeWidth={0}
                         dot={(props: any) => {
                           const { cx, cy, payload } = props
-                          if (payload.isYoloDay) {
+                          if (payload.yoloDayMarker !== null) {
                             return (
                               <g>
                                 <circle cx={cx} cy={cy} r={6} fill="#ec4899" stroke="#fff" strokeWidth={2} />
-                                <text x={cx} y={cy + 20} textAnchor="middle" fill="#ec4899" fontSize={10}>
+                                <text x={cx} y={cy - 10} textAnchor="middle" fill="#ec4899" fontSize={10} fontWeight="bold">
                                   YOLO
                                 </text>
                               </g>
                             )
                           }
-                          return <circle cx={cx} cy={cy} r={4} fill="#3b82f6" strokeWidth={2} />
+                          return null
                         }}
-                        activeDot={{ r: 6 }}
+                        activeDot={false}
                         connectNulls={false}
                       />
                     </LineChart>
