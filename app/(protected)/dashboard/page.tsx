@@ -144,7 +144,7 @@ export default function DashboardPage() {
 
         // Create a set of YOLO day dates for quick lookup
         const yoloDayDates = new Set(
-          yoloDaysData?.map((yoloDay) => yoloDay.date) || []
+          yoloDaysData?.map((yoloDay: YoloDay) => yoloDay.date) || []
         )
 
         // Initialize daily totals with zeros

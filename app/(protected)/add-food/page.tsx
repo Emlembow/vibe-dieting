@@ -242,7 +242,7 @@ export default function AddFoodPage() {
     // Debounce the search
     const timeoutId = setTimeout(fetchAllFoodHistory, 300)
     return () => clearTimeout(timeoutId)
-  }, [user, recentFoodsSearch])
+  }, [user, recentFoodsSearch, recentFoods])
 
   // Filter food history based on search
   useEffect(() => {
