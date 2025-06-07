@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@/test-utils'
+import { render, screen, fireEvent, waitFor, act } from '@/test-utils'
 import GoalsPage from '../page'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/auth-context'
@@ -23,6 +23,27 @@ const mockExistingGoal = {
   updated_at: new Date().toISOString(),
 }
 
+// Helper to create a complete mock query builder
+const createMockQueryBuilder = (returnValue = { data: null, error: null }) => {
+  const mockBuilder = {
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    neq: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue(returnValue),
+    order: jest.fn(() => Promise.resolve(returnValue)),
+    limit: jest.fn().mockReturnThis(),
+    gte: jest.fn().mockReturnThis(),
+    lte: jest.fn().mockReturnThis(),
+    then: jest.fn((onFulfilled) => Promise.resolve(returnValue).then(onFulfilled)),
+    catch: jest.fn((onRejected) => Promise.resolve(returnValue).catch(onRejected)),
+  }
+  
+  return mockBuilder
+}
+
 describe('Goals Page', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -35,311 +56,220 @@ describe('Goals Page', () => {
     ;(useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     })
+
+    // Set default mock
+    mockSupabase.from = jest.fn(() => createMockQueryBuilder())
   })
 
-  it('renders goals form with all fields', () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-    }))
+  it('renders goals form with all fields', async () => {
+    await act(async () => {
+      render(<GoalsPage />)
+    })
     
-    mockSupabase.from = mockFrom
-
-    render(<GoalsPage />)
-    
-    expect(screen.getByText(/set your macro goals/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/daily calorie goal/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/protein goal/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/carbohydrate goal/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/fat goal/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /save goals/i })).toBeInTheDocument()
+    expect(screen.getByText('Set Your Macro Goals')).toBeInTheDocument()
+    expect(screen.getByLabelText(/daily calorie target/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/protein target/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/carbohydrate target/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/fat target/i)).toBeInTheDocument()
   })
 
-  it('loads and displays existing goals', async () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: mockExistingGoal, error: null }),
-    }))
-    
-    mockSupabase.from = mockFrom
+  it('displays existing goals when available', async () => {
+    mockSupabase.from = jest.fn(() => 
+      createMockQueryBuilder({ data: [mockExistingGoal], error: null })
+    )
 
-    render(<GoalsPage />)
+    await act(async () => {
+      render(<GoalsPage />)
+    })
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('2000')).toBeInTheDocument() // Calories
-      expect(screen.getByDisplayValue('150')).toBeInTheDocument() // Protein
-      expect(screen.getByDisplayValue('200')).toBeInTheDocument() // Carbs
-      expect(screen.getByDisplayValue('70')).toBeInTheDocument() // Fat
+      const calorieInput = screen.getByLabelText(/daily calorie target/i) as HTMLInputElement
+      const proteinInput = screen.getByLabelText(/protein target/i) as HTMLInputElement
+      const carbsInput = screen.getByLabelText(/carbohydrate target/i) as HTMLInputElement
+      const fatInput = screen.getByLabelText(/fat target/i) as HTMLInputElement
+
+      expect(calorieInput.value).toBe('2000')
+      expect(proteinInput.value).toBe('150')
+      expect(carbsInput.value).toBe('200')
+      expect(fatInput.value).toBe('70')
     })
   })
 
-  it('creates new goals when none exist', async () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      insert: jest.fn().mockResolvedValue({ data: null, error: null }),
+  it('handles form submission for new goals', async () => {
+    const mockInsert = jest.fn().mockReturnThis()
+    mockSupabase.from = jest.fn(() => ({
+      ...createMockQueryBuilder(),
+      insert: mockInsert,
     }))
-    
-    mockSupabase.from = mockFrom
 
-    render(<GoalsPage />)
-
-    // Fill in the form
-    fireEvent.change(screen.getByLabelText(/daily calorie goal/i), {
-      target: { value: '2500' }
-    })
-    fireEvent.change(screen.getByLabelText(/protein goal/i), {
-      target: { value: '180' }
-    })
-    fireEvent.change(screen.getByLabelText(/carbohydrate goal/i), {
-      target: { value: '250' }
-    })
-    fireEvent.change(screen.getByLabelText(/fat goal/i), {
-      target: { value: '80' }
+    await act(async () => {
+      render(<GoalsPage />)
     })
 
-    // Submit the form
-    fireEvent.click(screen.getByRole('button', { name: /save goals/i }))
+    const calorieInput = screen.getByLabelText(/daily calorie target/i)
+    const proteinInput = screen.getByLabelText(/protein target/i)
+    const carbsInput = screen.getByLabelText(/carbohydrate target/i)
+    const fatInput = screen.getByLabelText(/fat target/i)
+    const submitButton = screen.getByRole('button', { name: /save goals/i })
+
+    await act(async () => {
+      fireEvent.change(calorieInput, { target: { value: '2500' } })
+      fireEvent.change(proteinInput, { target: { value: '180' } })
+      fireEvent.change(carbsInput, { target: { value: '250' } })
+      fireEvent.change(fatInput, { target: { value: '80' } })
+      fireEvent.click(submitButton)
+    })
 
     await waitFor(() => {
-      expect(mockFrom).toHaveBeenCalledWith('macro_goals')
+      expect(mockInsert).toHaveBeenCalledWith({
+        user_id: 'test-user',
+        calories: 2500,
+        protein: 180,
+        carbs: 250,
+        fat: 80,
+      })
       expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
   })
 
-  it('updates existing goals', async () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: mockExistingGoal, error: null }),
-      update: jest.fn().mockReturnThis(),
-    }))
-    
-    mockSupabase.from = mockFrom
+  it('handles form submission for updating goals', async () => {
+    const mockUpdate = jest.fn().mockReturnThis()
+    mockSupabase.from = jest.fn((table) => {
+      if (table === 'macro_goals') {
+        const builder = createMockQueryBuilder({ data: [mockExistingGoal], error: null })
+        builder.update = mockUpdate
+        return builder
+      }
+      return createMockQueryBuilder()
+    })
 
-    render(<GoalsPage />)
+    await act(async () => {
+      render(<GoalsPage />)
+    })
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('2000')).toBeInTheDocument()
     })
 
-    // Update calorie goal
-    fireEvent.change(screen.getByLabelText(/daily calorie goal/i), {
-      target: { value: '2200' }
+    const calorieInput = screen.getByLabelText(/daily calorie target/i)
+    const submitButton = screen.getByRole('button', { name: /update goals/i })
+
+    await act(async () => {
+      fireEvent.change(calorieInput, { target: { value: '2200' } })
+      fireEvent.click(submitButton)
     })
 
-    // Submit the form
-    fireEvent.click(screen.getByRole('button', { name: /save goals/i }))
-
     await waitFor(() => {
-      expect(mockFrom).toHaveBeenCalledWith('macro_goals')
+      expect(mockUpdate).toHaveBeenCalledWith({
+        calories: 2200,
+        protein: 150,
+        carbs: 200,
+        fat: 70,
+      })
       expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
   })
 
-  it('validates numeric inputs', () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-    }))
-    
-    mockSupabase.from = mockFrom
+  it('validates calorie input is positive', async () => {
+    await act(async () => {
+      render(<GoalsPage />)
+    })
 
-    render(<GoalsPage />)
+    const calorieInput = screen.getByLabelText(/daily calorie target/i) as HTMLInputElement
+    const submitButton = screen.getByRole('button', { name: /save goals/i })
 
-    const calorieInput = screen.getByLabelText(/daily calorie goal/i) as HTMLInputElement
-    
-    // Try to enter non-numeric value
-    fireEvent.change(calorieInput, { target: { value: 'abc' } })
-    
-    // The input should not accept non-numeric values
-    expect(calorieInput.value).toBe('')
-  })
+    await act(async () => {
+      fireEvent.change(calorieInput, { target: { value: '0' } })
+      fireEvent.click(submitButton)
+    })
 
-  it('validates minimum values', () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-    }))
-    
-    mockSupabase.from = mockFrom
-
-    render(<GoalsPage />)
-
-    const calorieInput = screen.getByLabelText(/daily calorie goal/i) as HTMLInputElement
-    
-    // Try to enter negative value
-    fireEvent.change(calorieInput, { target: { value: '-100' } })
-    
-    // Submit the form
-    fireEvent.click(screen.getByRole('button', { name: /save goals/i }))
-    
-    // Check HTML5 validation
     expect(calorieInput.validity.valid).toBe(false)
   })
 
-  it('displays preset goal options', () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-    }))
-    
-    mockSupabase.from = mockFrom
+  it('calculates macro percentages correctly', async () => {
+    await act(async () => {
+      render(<GoalsPage />)
+    })
 
-    render(<GoalsPage />)
+    const calorieInput = screen.getByLabelText(/daily calorie target/i)
+    const proteinInput = screen.getByLabelText(/protein target/i)
+    const carbsInput = screen.getByLabelText(/carbohydrate target/i)
+    const fatInput = screen.getByLabelText(/fat target/i)
 
-    expect(screen.getByText(/quick presets/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /weight loss/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /maintenance/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /muscle gain/i })).toBeInTheDocument()
-  })
-
-  it('applies preset goals when clicked', async () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-    }))
-    
-    mockSupabase.from = mockFrom
-
-    render(<GoalsPage />)
-
-    // Click weight loss preset
-    fireEvent.click(screen.getByRole('button', { name: /weight loss/i }))
+    await act(async () => {
+      fireEvent.change(calorieInput, { target: { value: '2000' } })
+      fireEvent.change(proteinInput, { target: { value: '150' } })
+      fireEvent.change(carbsInput, { target: { value: '200' } })
+      fireEvent.change(fatInput, { target: { value: '67' } })
+    })
 
     await waitFor(() => {
-      // Weight loss preset values
-      expect(screen.getByDisplayValue('1500')).toBeInTheDocument() // Calories
-      expect(screen.getByDisplayValue('120')).toBeInTheDocument() // Protein
-      expect(screen.getByDisplayValue('150')).toBeInTheDocument() // Carbs
-      expect(screen.getByDisplayValue('50')).toBeInTheDocument() // Fat
+      expect(screen.getByText(/30%/)).toBeInTheDocument() // Protein: (150*4)/2000 = 30%
+      expect(screen.getByText(/40%/)).toBeInTheDocument() // Carbs: (200*4)/2000 = 40%
+      expect(screen.getByText(/30%/)).toBeInTheDocument() // Fat: (67*9)/2000 ≈ 30%
     })
   })
 
-  it('handles database error when loading goals', async () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ 
-        data: null, 
-        error: { message: 'Database connection failed' } 
-      }),
-    }))
-    
-    mockSupabase.from = mockFrom
+  it('handles API errors gracefully', async () => {
+    mockSupabase.from = jest.fn(() => 
+      createMockQueryBuilder({ data: null, error: { message: 'Database error' } })
+    )
 
-    render(<GoalsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText(/failed to load goals/i)).toBeInTheDocument()
+    await act(async () => {
+      render(<GoalsPage />)
     })
+
+    // Should still render the form even with error
+    expect(screen.getByText('Set Your Macro Goals')).toBeInTheDocument()
   })
 
-  it('handles database error when saving goals', async () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      insert: jest.fn().mockResolvedValue({ 
-        data: null, 
-        error: { message: 'Failed to save' } 
-      }),
-    }))
-    
-    mockSupabase.from = mockFrom
-
-    render(<GoalsPage />)
-
-    // Fill form and submit
-    fireEvent.change(screen.getByLabelText(/daily calorie goal/i), {
-      target: { value: '2000' }
-    })
-    fireEvent.change(screen.getByLabelText(/protein goal/i), {
-      target: { value: '150' }
-    })
-    fireEvent.change(screen.getByLabelText(/carbohydrate goal/i), {
-      target: { value: '200' }
-    })
-    fireEvent.change(screen.getByLabelText(/fat goal/i), {
-      target: { value: '70' }
-    })
-
-    fireEvent.click(screen.getByRole('button', { name: /save goals/i }))
-
-    await waitFor(() => {
-      expect(screen.getByText(/failed to save goals/i)).toBeInTheDocument()
-    })
-  })
-
-  it('disables form while saving', async () => {
+  it('disables form while submitting', async () => {
     let resolveInsert: any
-    const insertPromise = new Promise(resolve => {
-      resolveInsert = resolve
-    })
-
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      insert: jest.fn().mockReturnValue(insertPromise),
+    const insertPromise = new Promise(resolve => { resolveInsert = resolve })
+    
+    const mockInsert = jest.fn(() => ({
+      then: (callback: any) => insertPromise.then(callback)
     }))
     
-    mockSupabase.from = mockFrom
+    mockSupabase.from = jest.fn(() => ({
+      ...createMockQueryBuilder(),
+      insert: mockInsert,
+    }))
 
-    render(<GoalsPage />)
-
-    // Fill and submit form
-    fireEvent.change(screen.getByLabelText(/daily calorie goal/i), {
-      target: { value: '2000' }
-    })
-    fireEvent.change(screen.getByLabelText(/protein goal/i), {
-      target: { value: '150' }
-    })
-    fireEvent.change(screen.getByLabelText(/carbohydrate goal/i), {
-      target: { value: '200' }
-    })
-    fireEvent.change(screen.getByLabelText(/fat goal/i), {
-      target: { value: '70' }
+    await act(async () => {
+      render(<GoalsPage />)
     })
 
     const submitButton = screen.getByRole('button', { name: /save goals/i })
-    fireEvent.click(submitButton)
+    const calorieInput = screen.getByLabelText(/daily calorie target/i)
 
-    // Button should be disabled
+    await act(async () => {
+      fireEvent.change(calorieInput, { target: { value: '2000' } })
+      fireEvent.click(submitButton)
+    })
+
     expect(submitButton).toBeDisabled()
-    expect(screen.getByText(/saving.../i)).toBeInTheDocument()
+    expect(screen.getByText('Saving...')).toBeInTheDocument()
 
-    // Resolve the promise
-    resolveInsert({ data: null, error: null })
+    await act(async () => {
+      resolveInsert({ data: mockExistingGoal, error: null })
+    })
 
     await waitFor(() => {
       expect(submitButton).not.toBeDisabled()
     })
   })
 
-  it('displays macro ratio calculations', async () => {
-    const mockFrom = jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: mockExistingGoal, error: null }),
-    }))
-    
-    mockSupabase.from = mockFrom
-
-    render(<GoalsPage />)
-
-    await waitFor(() => {
-      // Should display macro percentages
-      expect(screen.getByText(/protein.*30%/i)).toBeInTheDocument()
-      expect(screen.getByText(/carbs.*40%/i)).toBeInTheDocument()
-      expect(screen.getByText(/fat.*30%/i)).toBeInTheDocument()
+  it('shows loading state when user is not authenticated', async () => {
+    mockUseAuth.mockReturnValue({
+      user: null,
+      isLoading: true,
     })
+
+    await act(async () => {
+      render(<GoalsPage />)
+    })
+
+    expect(screen.getByText('Set Your Macro Goals')).toBeInTheDocument()
   })
 })

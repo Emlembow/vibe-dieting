@@ -31,20 +31,37 @@ jest.mock('next/navigation', () => {
 jest.mock('@/lib/supabase', () => {
   // Create a chainable mock that implements thenable pattern
   const createMockQueryBuilder = () => {
+    let resolvedValue = { data: null, error: null }
+    
     const mockBuilder = {
       select: jest.fn().mockReturnThis(),
       insert: jest.fn().mockReturnThis(),
       update: jest.fn().mockReturnThis(),
       delete: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      neq: jest.fn().mockReturnThis(),
+      gt: jest.fn().mockReturnThis(),
+      gte: jest.fn().mockReturnThis(),
+      lt: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockReturnThis(),
+      like: jest.fn().mockReturnThis(),
+      ilike: jest.fn().mockReturnThis(),
+      is: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
+      contains: jest.fn().mockReturnThis(),
+      containedBy: jest.fn().mockReturnThis(),
+      range: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
-      gte: jest.fn().mockReturnThis(),
-      lte: jest.fn().mockReturnThis(),
+      single: jest.fn(() => {
+        resolvedValue = { data: null, error: null }
+        return Promise.resolve(resolvedValue)
+      }),
+      maybeSingle: jest.fn(() => Promise.resolve(resolvedValue)),
       // Make it thenable for async/await
-      then: jest.fn((resolve) => resolve({ data: null, error: null })),
-      catch: jest.fn(),
+      then: jest.fn((onFulfilled) => Promise.resolve(resolvedValue).then(onFulfilled)),
+      catch: jest.fn((onRejected) => Promise.resolve(resolvedValue).catch(onRejected)),
+      finally: jest.fn((onFinally) => Promise.resolve(resolvedValue).finally(onFinally)),
     }
     
     return mockBuilder
@@ -56,11 +73,23 @@ jest.mock('@/lib/supabase', () => {
         signInWithPassword: jest.fn().mockResolvedValue({ data: null, error: null }),
         signUp: jest.fn().mockResolvedValue({ data: null, error: null }),
         signOut: jest.fn().mockResolvedValue({ error: null }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
         getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
-        onAuthStateChange: jest.fn(),
+        onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
       },
       from: jest.fn(() => createMockQueryBuilder()),
     },
+    createServerClient: jest.fn(() => ({
+      auth: {
+        signInWithPassword: jest.fn().mockResolvedValue({ data: null, error: null }),
+        signUp: jest.fn().mockResolvedValue({ data: null, error: null }),
+        signOut: jest.fn().mockResolvedValue({ error: null }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+        onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+      },
+      from: jest.fn(() => createMockQueryBuilder()),
+    })),
   }
 })
 
