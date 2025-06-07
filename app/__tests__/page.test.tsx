@@ -10,12 +10,16 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock window.location
-Object.defineProperty(window, 'location', {
-  value: {
-    search: '',
-  },
-  writable: true,
-})
+delete (window as any).location;
+(window as any).location = {
+  search: '',
+  href: 'http://localhost:3000',
+  origin: 'http://localhost:3000',
+  pathname: '/',
+  reload: jest.fn(),
+  assign: jest.fn(),
+  replace: jest.fn(),
+};
 
 describe('Home Page', () => {
   beforeEach(() => {

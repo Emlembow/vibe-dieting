@@ -28,6 +28,29 @@ describe('Add Food Page', () => {
       push: mockPush,
     })
 
+    // Create mock query builder factory function
+    const createMockQueryBuilder = (resolvedValue: any) => ({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue(resolvedValue),
+      single: jest.fn().mockResolvedValue(resolvedValue),
+      gte: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockResolvedValue(resolvedValue),
+      then: jest.fn((onFulfilled) => Promise.resolve(resolvedValue).then(onFulfilled)),
+      catch: jest.fn((onRejected) => Promise.resolve(resolvedValue).catch(onRejected)),
+    })
+
+    // Mock supabase.from
+    const mockFrom = jest.fn((table: string) => {
+      if (table === 'food_entries') {
+        return createMockQueryBuilder({ data: [], error: null })
+      }
+      return createMockQueryBuilder({ data: null, error: null })
+    })
+    
+    mockSupabase.from = mockFrom
+
     // Mock fetch for nutrition API
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
