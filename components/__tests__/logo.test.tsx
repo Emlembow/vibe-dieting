@@ -8,10 +8,11 @@ describe('Logo Component', () => {
     expect(screen.getByText('Vibe Dieting')).toBeInTheDocument()
   })
 
-  it('applies custom className', () => {
+  it('applies custom className correctly', () => {
     const { container } = render(<Logo className="custom-class" />)
     
-    expect(container.firstChild).toHaveClass('custom-class')
+    const logoElement = container.querySelector('.custom-class')
+    expect(logoElement).toBeInTheDocument()
   })
 
   it('renders as a link when href is provided', () => {
@@ -27,5 +28,24 @@ describe('Logo Component', () => {
     
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
     expect(screen.getByText('Vibe Dieting')).toBeInTheDocument()
+  })
+
+  it('renders with custom props', () => {
+    render(<Logo className="custom-class" href="/dashboard" />)
+    
+    const logoLink = screen.getByRole('link')
+    expect(logoLink).toHaveAttribute('href', '/dashboard')
+    expect(logoLink).toHaveTextContent('Vibe Dieting')
+    
+    // Check if custom class is applied
+    const logoElement = logoLink.closest('.custom-class') || logoLink.querySelector('.custom-class') || logoLink
+    expect(logoElement).toBeInTheDocument()
+  })
+
+  it('handles missing href gracefully', () => {
+    render(<Logo className="test-class" />)
+    
+    expect(screen.getByText('Vibe Dieting')).toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
   })
 })

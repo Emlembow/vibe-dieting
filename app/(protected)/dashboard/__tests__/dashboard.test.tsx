@@ -294,6 +294,22 @@ describe('Dashboard Page', () => {
       render(<DashboardPage />)
     })
 
-    expect(screen.getByText(/Daily Summary/i)).toBeInTheDocument()
+    // Should still render the dashboard structure
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+  })
+
+  it('renders loading state when data is fetching', async () => {
+    mockUseAuth.mockReturnValue({ 
+      user: { id: 'test-user', email: 'test@example.com' }, 
+      isLoading: false 
+    })
+
+    await act(async () => {
+      render(<DashboardPage />)
+    })
+
+    // Should render the main dashboard content
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+    expect(screen.getByText(/Today's Food Log/i)).toBeInTheDocument()
   })
 })

@@ -57,8 +57,8 @@ describe('Goals Page', () => {
       push: mockPush,
     })
 
-    // Set default mock
-    mockSupabase.from = jest.fn(() => createMockQueryBuilder())
+    // Set consistent default mock for all tests
+    mockSupabase.from = jest.fn(() => createMockQueryBuilder({ data: null, error: null }))
   })
 
   it('renders goals form with all fields', async () => {
@@ -270,6 +270,31 @@ describe('Goals Page', () => {
       render(<GoalsPage />)
     })
 
+    // Should still render the form even when loading
     expect(screen.getByText('Set Your Macro Goals')).toBeInTheDocument()
+  })
+
+  it('handles form submission with consistent mocking', async () => {
+    const mockInsert = jest.fn(() => Promise.resolve({ data: mockExistingGoal, error: null }))
+    mockSupabase.from = jest.fn(() => ({
+      ...createMockQueryBuilder({ data: null, error: null }),
+      insert: mockInsert,
+    }))
+
+    await act(async () => {
+      render(<GoalsPage />)
+    })
+
+    const calorieInput = screen.getByLabelText(/daily calorie target/i)
+    const submitButton = screen.getByRole('button', { name: /save goals/i })
+
+    await act(async () => {
+      fireEvent.change(calorieInput, { target: { value: '2000' } })
+      fireEvent.click(submitButton)
+    })
+
+    await waitFor(() => {
+      expect(mockInsert).toHaveBeenCalled()
+    })
   })
 })
