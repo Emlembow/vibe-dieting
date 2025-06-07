@@ -471,9 +471,9 @@ export default function DashboardPage() {
                     onClick={() => setIsYoloDayDialogOpen(true)}
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground"
+                    className="text-purple-500 hover:text-purple-600 hover:bg-purple-500/10"
                   >
-                    <Star className="mr-2 h-4 w-4" />
+                    <Star className="mr-2 h-4 w-4 fill-purple-500" />
                     <span className="hidden sm:inline">YOLO Day</span>
                   </Button>
                 )}

@@ -31,6 +31,7 @@ jest.mock('../components/ui/card', () => ({
 jest.mock('lucide-react', () => ({
   Star: () => <div>Star Icon</div>,
   RotateCcw: () => <div>RotateCcw Icon</div>,
+  Sparkles: () => <div>Sparkles Icon</div>,
 }))
 
 describe('YOLO Day Components', () => {
@@ -54,7 +55,7 @@ describe('YOLO Day Components', () => {
       )
 
       expect(screen.getByText('Take a YOLO Day?')).toBeInTheDocument()
-      expect(screen.getByText('Skip tracking for today. No judgment.')).toBeInTheDocument()
+      expect(screen.getByText('Skip tracking for today. No judgment, just vibes ✨')).toBeInTheDocument()
     })
 
     it('displays the formatted date', () => {
@@ -81,7 +82,7 @@ describe('YOLO Day Components', () => {
         />
       )
 
-      const confirmButton = screen.getByText('Confirm')
+      const confirmButton = screen.getByText('Let\'s Go! 🎉')
       fireEvent.click(confirmButton)
 
       expect(mockOnConfirm).toHaveBeenCalledTimes(1)
@@ -129,8 +130,8 @@ describe('YOLO Day Components', () => {
         />
       )
 
-      expect(screen.getByText('YOLO Day')).toBeInTheDocument()
-      expect(screen.getByText('Taking a break from tracking today')).toBeInTheDocument()
+      expect(screen.getByText('YOLO Day Active! 🎉')).toBeInTheDocument()
+      expect(screen.getByText('Taking a break from tracking today. Living in the moment ✨')).toBeInTheDocument()
     })
 
     it('displays the formatted date', () => {
