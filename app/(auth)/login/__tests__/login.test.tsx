@@ -7,12 +7,27 @@ jest.mock('@/lib/supabase')
 
 const mockSupabase = supabase as jest.Mocked<typeof supabase>
 
-// Get the mocked router functions
-const mockNavigation = jest.requireMock('next/navigation')
+// Create a mock router with push function
+const mockPush = jest.fn()
+const mockRouter = {
+  push: mockPush,
+  replace: jest.fn(),
+  back: jest.fn(),
+  prefetch: jest.fn(),
+  refresh: jest.fn(),
+}
+
+// Mock next/navigation useRouter
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  usePathname: () => '',
+  useSearchParams: () => new URLSearchParams(),
+}))
 
 describe('Login Page', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockPush.mockClear()
   })
 
   it('renders login form with all required fields', () => {
@@ -67,7 +82,7 @@ describe('Login Page', () => {
         email: 'test@example.com',
         password: 'password123',
       })
-      expect(mockNavigation.mockPush).toHaveBeenCalledWith('/dashboard')
+      expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
   })
 
@@ -89,7 +104,7 @@ describe('Login Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Invalid login credentials')).toBeInTheDocument()
-      expect(mockNavigation.mockPush).not.toHaveBeenCalled()
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 

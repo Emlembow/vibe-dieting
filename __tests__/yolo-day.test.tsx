@@ -1,120 +1,178 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { YoloDayDialog } from '@/components/yolo-day-dialog'
-import { YoloDayDisplay } from '@/components/yolo-day-display'
-import type { YoloDay } from '@/types/database'
+import React from 'react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import { YoloDayDialog } from '../components/yolo-day-dialog'
+import { YoloDayDisplay } from '../components/yolo-day-display'
+import type { YoloDay } from '../types/database'
 
-// Mock date
-const mockDate = new Date('2024-01-06')
+// Mock the UI components
+jest.mock('../components/ui/dialog', () => ({
+  Dialog: ({ children, open }: any) => open ? <div>{children}</div> : null,
+  DialogContent: ({ children, className }: any) => <div className={className}>{children}</div>,
+  DialogHeader: ({ children }: any) => <div>{children}</div>,
+  DialogTitle: ({ children, className }: any) => <h2 className={className}>{children}</h2>,
+  DialogFooter: ({ children, className }: any) => <div className={className}>{children}</div>,
+}))
+
+jest.mock('../components/ui/button', () => ({
+  Button: ({ children, onClick, variant, className, size }: any) => (
+    <button onClick={onClick} className={className} data-variant={variant} data-size={size}>
+      {children}
+    </button>
+  ),
+}))
+
+jest.mock('../components/ui/card', () => ({
+  Card: ({ children, className }: any) => <div className={className}>{children}</div>,
+  CardContent: ({ children, className }: any) => <div className={className}>{children}</div>,
+}))
+
+// Mock Lucide icons
+jest.mock('lucide-react', () => ({
+  Star: () => <div>Star Icon</div>,
+  RotateCcw: () => <div>RotateCcw Icon</div>,
+  Sparkles: () => <div>Sparkles Icon</div>,
+}))
 
 describe('YOLO Day Components', () => {
   describe('YoloDayDialog', () => {
-    const mockProps = {
-      isOpen: true,
-      onClose: jest.fn(),
-      onConfirm: jest.fn(),
-      date: mockDate,
-    }
+    const mockOnClose = jest.fn()
+    const mockOnConfirm = jest.fn()
+    const testDate = new Date('2024-01-05')
 
     beforeEach(() => {
       jest.clearAllMocks()
     })
 
-    it('renders YOLO Day dialog with fun messaging', () => {
-      render(<YoloDayDialog {...mockProps} />)
-      
-      expect(screen.getByText('YOLO Day!')).toBeInTheDocument()
-      expect(screen.getByText('No judgment, just vibes! ✨')).toBeInTheDocument()
-      expect(screen.getByText('Declare YOLO Day!')).toBeInTheDocument()
+    it('renders YOLO Day dialog with simplified messaging', () => {
+      render(
+        <YoloDayDialog
+          isOpen={true}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          date={testDate}
+        />
+      )
+
+      expect(screen.getByText('Take a YOLO Day?')).toBeInTheDocument()
+      expect(screen.getByText('Skip tracking for today. No judgment, just vibes ✨')).toBeInTheDocument()
     })
 
     it('displays the formatted date', () => {
-      render(<YoloDayDialog {...mockProps} />)
-      
-      expect(screen.getByText(/Saturday, January 6, 2024/)).toBeInTheDocument()
+      render(
+        <YoloDayDialog
+          isOpen={true}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          date={testDate}
+        />
+      )
+
+      // Check for date text - may vary by timezone
+      expect(screen.getByText(/Jan 4|Jan 5/)).toBeInTheDocument()
     })
 
-    it('allows selecting predefined reasons', () => {
-      render(<YoloDayDialog {...mockProps} />)
-      
-      const celebratingButton = screen.getByText('Celebrating life!')
-      fireEvent.click(celebratingButton)
-      
-      expect(celebratingButton).toHaveClass('bg-pink-500')
-    })
+    it('calls onConfirm when confirmed', () => {
+      render(
+        <YoloDayDialog
+          isOpen={true}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          date={testDate}
+        />
+      )
 
-    it('calls onConfirm when YOLO Day is declared', () => {
-      render(<YoloDayDialog {...mockProps} />)
-      
-      const confirmButton = screen.getByText('Declare YOLO Day!')
+      const confirmButton = screen.getByText('Let\'s Go! 🎉')
       fireEvent.click(confirmButton)
-      
-      expect(mockProps.onConfirm).toHaveBeenCalledWith(undefined)
+
+      expect(mockOnConfirm).toHaveBeenCalledTimes(1)
+      expect(mockOnConfirm).toHaveBeenCalledWith()
     })
 
     it('calls onClose when dialog is cancelled', () => {
-      render(<YoloDayDialog {...mockProps} />)
-      
-      const cancelButton = screen.getByText('Maybe Later')
+      render(
+        <YoloDayDialog
+          isOpen={true}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          date={testDate}
+        />
+      )
+
+      const cancelButton = screen.getByText('Cancel')
       fireEvent.click(cancelButton)
-      
-      expect(mockProps.onClose).toHaveBeenCalled()
+
+      expect(mockOnClose).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('YoloDayDisplay', () => {
+    const mockOnRemove = jest.fn()
+    const testDate = new Date('2024-01-05')
     const mockYoloDay: YoloDay = {
-      id: '1',
-      user_id: 'user-1',
-      date: '2024-01-06',
-      reason: 'Celebrating life!',
-      created_at: '2024-01-06T10:00:00Z',
-    }
-
-    const mockProps = {
-      yoloDay: mockYoloDay,
-      onRemove: jest.fn(),
-      date: mockDate,
+      id: '123',
+      user_id: '456',
+      date: '2024-01-05',
+      reason: null,
+      created_at: '2024-01-05T00:00:00Z'
     }
 
     beforeEach(() => {
       jest.clearAllMocks()
     })
 
-    it('renders YOLO Day display with celebration', () => {
-      render(<YoloDayDisplay {...mockProps} />)
-      
-      expect(screen.getByText('YOLO DAY!')).toBeInTheDocument()
-      expect(screen.getByText('You\'re living your best life today!')).toBeInTheDocument()
-      expect(screen.getByText('No tracking, no stress, just vibes')).toBeInTheDocument()
-    })
+    it('renders YOLO Day display with simplified UI', () => {
+      render(
+        <YoloDayDisplay
+          yoloDay={mockYoloDay}
+          onRemove={mockOnRemove}
+          date={testDate}
+        />
+      )
 
-    it('displays the reason when provided', () => {
-      render(<YoloDayDisplay {...mockProps} />)
-      
-      expect(screen.getByText('"Celebrating life!"')).toBeInTheDocument()
+      expect(screen.getByText('YOLO Day Active! 🎉')).toBeInTheDocument()
+      expect(screen.getByText('Taking a break from tracking today. Living in the moment ✨')).toBeInTheDocument()
     })
 
     it('displays the formatted date', () => {
-      render(<YoloDayDisplay {...mockProps} />)
-      
-      expect(screen.getByText('Saturday, January 6')).toBeInTheDocument()
+      render(
+        <YoloDayDisplay
+          yoloDay={mockYoloDay}
+          onRemove={mockOnRemove}
+          date={testDate}
+        />
+      )
+
+      // Check for date text - may vary by timezone
+      expect(screen.getByText(/January 4|January 5/)).toBeInTheDocument()
     })
 
-    it('calls onRemove when back to tracking is clicked', () => {
-      render(<YoloDayDisplay {...mockProps} />)
-      
-      const backButton = screen.getByText('Back to Tracking')
-      fireEvent.click(backButton)
-      
-      expect(mockProps.onRemove).toHaveBeenCalled()
+    it('calls onRemove when resume tracking is clicked', () => {
+      render(
+        <YoloDayDisplay
+          yoloDay={mockYoloDay}
+          onRemove={mockOnRemove}
+          date={testDate}
+        />
+      )
+
+      const resumeButton = screen.getByText('Resume Tracking')
+      fireEvent.click(resumeButton)
+
+      expect(mockOnRemove).toHaveBeenCalledTimes(1)
     })
 
     it('handles YOLO day without reason', () => {
-      const yoloDayWithoutReason = { ...mockYoloDay, reason: null }
-      render(<YoloDayDisplay {...{ ...mockProps, yoloDay: yoloDayWithoutReason }} />)
-      
-      expect(screen.getByText('YOLO DAY!')).toBeInTheDocument()
-      expect(screen.queryByText('Today\'s vibe:')).not.toBeInTheDocument()
+      render(
+        <YoloDayDisplay
+          yoloDay={mockYoloDay}
+          onRemove={mockOnRemove}
+          date={testDate}
+        />
+      )
+
+      // Should not show any reason-related UI
+      expect(screen.queryByText(/Today's vibe:/)).not.toBeInTheDocument()
     })
   })
 })
