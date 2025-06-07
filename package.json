@@ -1,6 +1,6 @@
 {
   "name": "vibe-dieting",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A modern macro tracking app with AI-powered nutrition estimates using Next.js, Supabase, and OpenAI",
   "author": "Vibe Dieting Contributors",
   "license": "MIT",
