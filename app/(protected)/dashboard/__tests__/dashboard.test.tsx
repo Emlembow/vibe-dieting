@@ -120,7 +120,7 @@ describe('Dashboard Page', () => {
     expect(screen.getByText(/Today's Food Log/i)).toBeInTheDocument()
   })
 
-  it.skip('displays macro goals correctly', async () => {
+  it('displays macro goals correctly', async () => {
     await act(async () => {
       render(<DashboardPage />)
     })
@@ -133,7 +133,7 @@ describe('Dashboard Page', () => {
     })
   })
 
-  it.skip('displays food entries for selected date', async () => {
+  it('displays food entries for selected date', async () => {
     await act(async () => {
       render(<DashboardPage />)
     })
@@ -146,7 +146,7 @@ describe('Dashboard Page', () => {
     })
   })
 
-  it.skip('calculates and displays totals correctly', async () => {
+  it('calculates and displays totals correctly', async () => {
     await act(async () => {
       render(<DashboardPage />)
     })
@@ -163,7 +163,7 @@ describe('Dashboard Page', () => {
     })
   })
 
-  it.skip('handles delete food entry', async () => {
+  it('handles delete food entry', async () => {
     const mockDelete = jest.fn().mockResolvedValue({ error: null })
     
     const createMockQueryBuilder = (resolvedValue: any, customDelete?: any) => ({
@@ -226,7 +226,7 @@ describe('Dashboard Page', () => {
     })
   })
 
-  it.skip('handles date navigation', async () => {
+  it('handles date navigation', async () => {
     await act(async () => {
       render(<DashboardPage />)
     })
@@ -244,7 +244,7 @@ describe('Dashboard Page', () => {
     })
   })
 
-  it.skip('displays empty state when no goals set', async () => {
+  it('displays empty state when no goals set', async () => {
     const createMockQueryBuilder = (resolvedValue: any) => ({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
@@ -284,7 +284,7 @@ describe('Dashboard Page', () => {
     })
   })
 
-  it.skip('handles API errors gracefully', async () => {
+  it('handles API errors gracefully', async () => {
     const createMockQueryBuilder = (resolvedValue: any) => ({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
