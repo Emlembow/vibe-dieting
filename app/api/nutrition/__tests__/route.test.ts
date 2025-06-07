@@ -1,16 +1,29 @@
-import { POST } from '../route'
-import { NextRequest } from 'next/server'
-import { authenticateRequest } from '@/lib/auth-api'
-import OpenAI from 'openai'
+/**
+ * @jest-environment node
+ */
 
-// Mock the global Request and Response
-global.Request = class Request {} as any
-global.Response = class Response {} as any
-
+// Mock modules before any imports
 jest.mock('@/lib/auth-api')
 jest.mock('openai')
 jest.mock('fs')
 jest.mock('path')
+
+// Mock Next.js server components
+jest.mock('next/server', () => ({
+  NextRequest: jest.fn(),
+  NextResponse: {
+    json: (data: any, init?: ResponseInit) => ({
+      ...new Response(JSON.stringify(data), init),
+      json: async () => data,
+    }),
+  },
+}))
+
+// Now import after mocks
+import { POST } from '../route'
+import { NextRequest } from 'next/server'
+import { authenticateRequest } from '@/lib/auth-api'
+import OpenAI from 'openai'
 
 const mockAuthenticateRequest = authenticateRequest as jest.Mock
 const mockOpenAI = OpenAI as jest.MockedClass<typeof OpenAI>
