@@ -38,6 +38,10 @@ const mockFoodEntries = [
     fat: 3.6,
     quantity: 1,
     unit: 'serving',
+    date: new Date().toISOString().split('T')[0], // Add date field for weekly data processing
+    protein_grams: 31,
+    carbs_total_grams: 0,
+    fat_total_grams: 3.6,
     consumed_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -52,6 +56,10 @@ const mockFoodEntries = [
     fat: 2,
     quantity: 1,
     unit: 'cup',
+    date: new Date().toISOString().split('T')[0], // Add date field for weekly data processing
+    protein_grams: 5,
+    carbs_total_grams: 45,
+    fat_total_grams: 2,
     consumed_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -68,26 +76,35 @@ describe('Dashboard Page', () => {
       isLoading: false,
     })
 
-    // Default mock for Supabase
+    // Default mock for Supabase - use the global mock and just set resolved values
+    const defaultMockQueryBuilder = {
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      order: jest.fn().mockReturnThis(),
+      gte: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockReturnThis(),
+      then: jest.fn((onFulfilled) => Promise.resolve({ data: null, error: null }).then(onFulfilled)),
+      catch: jest.fn((onRejected) => Promise.resolve({ data: null, error: null }).catch(onRejected)),
+    }
+
     const mockFrom = jest.fn((table: string) => {
-      const mockQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: null }),
-        order: jest.fn().mockReturnThis(),
-        gte: jest.fn().mockReturnThis(),
-        lte: jest.fn().mockReturnThis(),
-        delete: jest.fn().mockReturnThis(),
-      }
+      const mockQuery = { ...defaultMockQueryBuilder }
 
       if (table === 'macro_goals') {
         mockQuery.single = jest.fn().mockResolvedValue({ data: mockMacroGoal, error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: mockMacroGoal, error: null }).then(onFulfilled))
       } else if (table === 'food_entries') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: mockFoodEntries, error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: mockFoodEntries, error: null }).then(onFulfilled))
       } else if (table === 'yolo_days') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: [], error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: [], error: null }).then(onFulfilled))
       } else if (table === 'daily_nutrient_totals') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: [], error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: [], error: null }).then(onFulfilled))
       }
 
       return mockQuery
@@ -158,18 +175,25 @@ describe('Dashboard Page', () => {
         order: jest.fn().mockReturnThis(),
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
         delete: jest.fn().mockReturnThis(),
+        then: jest.fn((onFulfilled) => Promise.resolve({ data: null, error: null }).then(onFulfilled)),
+        catch: jest.fn((onRejected) => Promise.resolve({ data: null, error: null }).catch(onRejected)),
       }
 
       if (table === 'macro_goals') {
         mockQuery.single = jest.fn().mockResolvedValue({ data: mockMacroGoal, error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: mockMacroGoal, error: null }).then(onFulfilled))
       } else if (table === 'food_entries') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: mockFoodEntries, error: null })
         mockQuery.delete = mockDelete
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: mockFoodEntries, error: null }).then(onFulfilled))
       } else if (table === 'yolo_days') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: [], error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: [], error: null }).then(onFulfilled))
       } else if (table === 'daily_nutrient_totals') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: [], error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: [], error: null }).then(onFulfilled))
       }
 
       return mockQuery
@@ -235,14 +259,20 @@ describe('Dashboard Page', () => {
         order: jest.fn().mockReturnThis(),
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        then: jest.fn((onFulfilled) => Promise.resolve({ data: null, error: null }).then(onFulfilled)),
+        catch: jest.fn((onRejected) => Promise.resolve({ data: null, error: null }).catch(onRejected)),
       }
 
       if (table === 'food_entries') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: [], error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: [], error: null }).then(onFulfilled))
       } else if (table === 'yolo_days') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: [], error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: [], error: null }).then(onFulfilled))
       } else if (table === 'daily_nutrient_totals') {
         mockQuery.lte = jest.fn().mockResolvedValue({ data: [], error: null })
+        mockQuery.then = jest.fn((onFulfilled) => Promise.resolve({ data: [], error: null }).then(onFulfilled))
       }
 
       return mockQuery
@@ -271,6 +301,9 @@ describe('Dashboard Page', () => {
       order: jest.fn().mockReturnThis(),
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      then: jest.fn((onFulfilled) => Promise.resolve({ data: null, error: { message: 'Database error' } }).then(onFulfilled)),
+      catch: jest.fn((onRejected) => Promise.resolve({ data: null, error: { message: 'Database error' } }).catch(onRejected)),
     }))
     
     mockSupabase.from = mockFrom

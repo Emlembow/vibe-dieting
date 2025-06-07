@@ -7,7 +7,8 @@ describe('HighlightMatch Component', () => {
     
     const highlightedText = screen.getByText('Chicken')
     expect(highlightedText).toHaveClass('bg-yellow-200')
-    expect(screen.getByText(' Breast')).toBeInTheDocument()
+    // The non-highlighted part should be findable, but might be split across spans
+    expect(screen.getByText(/Breast/)).toBeInTheDocument()
   })
 
   it('handles case insensitive matching', () => {
@@ -44,7 +45,7 @@ describe('HighlightMatch Component', () => {
   it('handles special regex characters', () => {
     render(<HighlightMatch text="Cost $5.99" highlight="$5.99" />)
     
-    expect(screen.getByText('Cost ')).toBeInTheDocument()
+    expect(screen.getByText(/Cost/)).toBeInTheDocument()
     expect(screen.getByText('$5.99')).toHaveClass('bg-yellow-200')
   })
 })

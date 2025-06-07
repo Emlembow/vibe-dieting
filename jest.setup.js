@@ -184,6 +184,16 @@ global.IntersectionObserver = class IntersectionObserver {
   unobserve() {}
 }
 
+// Mock ResizeObserver for Recharts
+global.ResizeObserver = class ResizeObserver {
+  constructor(callback) {
+    this.callback = callback
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 // Suppress console errors in tests
 const originalError = console.error
 beforeAll(() => {

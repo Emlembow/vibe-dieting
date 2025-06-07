@@ -5,7 +5,8 @@ describe('Logo Component', () => {
   it('renders the logo with default props', () => {
     render(<Logo />)
     
-    expect(screen.getByText('Vibe Dieting')).toBeInTheDocument()
+    expect(screen.getByAltText('Vibe Dieting Logo')).toBeInTheDocument()
+    expect(screen.getByRole('img')).toHaveAttribute('src', expect.stringContaining('vibe-logo-full.png'))
   })
 
   it('applies custom className correctly', () => {
@@ -15,37 +16,42 @@ describe('Logo Component', () => {
     expect(logoElement).toBeInTheDocument()
   })
 
-  it('renders as a link when href is provided', () => {
-    render(<Logo href="/dashboard" />)
+  it('renders with different variants', () => {
+    render(<Logo variant="icon" />)
     
-    const logoLink = screen.getByRole('link')
-    expect(logoLink).toHaveAttribute('href', '/dashboard')
-    expect(logoLink).toHaveTextContent('Vibe Dieting')
+    expect(screen.getByRole('img')).toHaveAttribute('src', expect.stringContaining('vibe-logo-icon.png'))
   })
 
-  it('renders as a span when href is not provided', () => {
-    render(<Logo />)
+  it('renders with different sizes', () => {
+    render(<Logo size="lg" />)
     
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
-    expect(screen.getByText('Vibe Dieting')).toBeInTheDocument()
+    const img = screen.getByRole('img')
+    expect(img).toHaveAttribute('width', '64')
+    expect(img).toHaveAttribute('height', '64')
   })
 
   it('renders with custom props', () => {
-    render(<Logo className="custom-class" href="/dashboard" />)
+    render(<Logo className="custom-class" variant="dark" size="sm" />)
     
-    const logoLink = screen.getByRole('link')
-    expect(logoLink).toHaveAttribute('href', '/dashboard')
-    expect(logoLink).toHaveTextContent('Vibe Dieting')
+    const img = screen.getByRole('img')
+    expect(img).toHaveAttribute('src', expect.stringContaining('vibe-logo-dark.png'))
+    expect(img).toHaveAttribute('width', '32')
+    expect(img).toHaveAttribute('height', '32')
     
     // Check if custom class is applied
-    const logoElement = logoLink.closest('.custom-class') || logoLink.querySelector('.custom-class') || logoLink
+    const { container } = render(<Logo className="custom-class" />)
+    const logoElement = container.querySelector('.custom-class')
     expect(logoElement).toBeInTheDocument()
   })
 
-  it('handles missing href gracefully', () => {
-    render(<Logo className="test-class" />)
+  it('handles all variants correctly', () => {
+    const variants = ['default', 'icon', 'horizontal', 'vertical', 'dark', 'light']
     
-    expect(screen.getByText('Vibe Dieting')).toBeInTheDocument()
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    variants.forEach(variant => {
+      const { unmount } = render(<Logo variant={variant as any} />)
+      const img = screen.getByRole('img')
+      expect(img).toHaveAttribute('src', expect.stringContaining(`vibe-logo-${variant === 'default' ? 'full' : variant}.png`))
+      unmount()
+    })
   })
 })
