@@ -820,28 +820,28 @@ export default function TrendsPage() {
                 </div>
 
                 <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-                  <div className="bg-background rounded-lg p-3 shadow-sm border">
+                  <div className="bg-card rounded-lg p-3 shadow-sm border border-border">
                     <div className="flex items-center justify-center mb-2">
                       <div className="h-3 w-3 rounded-full bg-green-500 mr-1.5"></div>
-                      <span className="text-sm font-medium">Protein</span>
+                      <span className="text-sm font-medium text-card-foreground">Protein</span>
                     </div>
-                    <div className="text-2xl font-bold text-green-600">{summary.proteinPercentage}%</div>
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{summary.proteinPercentage}%</div>
                     <div className="text-xs text-muted-foreground">{summary.avgProtein}g avg.</div>
                   </div>
-                  <div className="bg-background rounded-lg p-3 shadow-sm border">
+                  <div className="bg-card rounded-lg p-3 shadow-sm border border-border">
                     <div className="flex items-center justify-center mb-2">
                       <div className="h-3 w-3 rounded-full bg-purple-500 mr-1.5"></div>
-                      <span className="text-sm font-medium">Carbs</span>
+                      <span className="text-sm font-medium text-card-foreground">Carbs</span>
                     </div>
-                    <div className="text-2xl font-bold text-purple-600">{summary.carbsPercentage}%</div>
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{summary.carbsPercentage}%</div>
                     <div className="text-xs text-muted-foreground">{summary.avgCarbs}g avg.</div>
                   </div>
-                  <div className="bg-background rounded-lg p-3 shadow-sm border">
+                  <div className="bg-card rounded-lg p-3 shadow-sm border border-border">
                     <div className="flex items-center justify-center mb-2">
                       <div className="h-3 w-3 rounded-full bg-yellow-500 mr-1.5"></div>
-                      <span className="text-sm font-medium">Fat</span>
+                      <span className="text-sm font-medium text-card-foreground">Fat</span>
                     </div>
-                    <div className="text-2xl font-bold text-yellow-600">{summary.fatPercentage}%</div>
+                    <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{summary.fatPercentage}%</div>
                     <div className="text-xs text-muted-foreground">{summary.avgFat}g avg.</div>
                   </div>
                 </div>
@@ -899,11 +899,11 @@ export default function TrendsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="bg-background rounded-lg p-3 shadow-sm border">
+                  <div className="bg-card rounded-lg p-3 shadow-sm border border-border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-green-500 mr-1.5"></div>
-                        <span className="text-sm font-medium">Protein</span>
+                        <span className="text-sm font-medium text-card-foreground">Protein</span>
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {summary.proteinGoalMet}%
@@ -917,11 +917,11 @@ export default function TrendsPage() {
                     </div>
                   </div>
 
-                  <div className="bg-background rounded-lg p-3 shadow-sm border">
+                  <div className="bg-card rounded-lg p-3 shadow-sm border border-border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-purple-500 mr-1.5"></div>
-                        <span className="text-sm font-medium">Carbs</span>
+                        <span className="text-sm font-medium text-card-foreground">Carbs</span>
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {summary.carbsGoalMet}%
@@ -935,11 +935,11 @@ export default function TrendsPage() {
                     </div>
                   </div>
 
-                  <div className="bg-background rounded-lg p-3 shadow-sm border">
+                  <div className="bg-card rounded-lg p-3 shadow-sm border border-border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-yellow-500 mr-1.5"></div>
-                        <span className="text-sm font-medium">Fat</span>
+                        <span className="text-sm font-medium text-card-foreground">Fat</span>
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {summary.fatGoalMet}%
