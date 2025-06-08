@@ -748,10 +748,10 @@ export default function TrendsPage() {
       </Tabs>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-950 dark:to-gray-950">
+        <Card className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900 border-slate-200 dark:border-slate-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-slate-600" />
+              <Target className="h-5 w-5 text-slate-600 dark:text-slate-400" />
               Macro Distribution
             </CardTitle>
             <CardDescription>Average macronutrient breakdown for selected period</CardDescription>
@@ -856,10 +856,10 @@ export default function TrendsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950">
+        <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 border-emerald-200 dark:border-emerald-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-emerald-600" />
+              <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               Goal Completion
             </CardTitle>
             <CardDescription>How often you've met your nutrition goals (within 90% of target)</CardDescription>
@@ -888,12 +888,12 @@ export default function TrendsPage() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-bold text-blue-600">{summary.calorieGoalMet}%</span>
+                      <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{summary.calorieGoalMet}%</span>
                       <span className="text-xs text-muted-foreground">of days</span>
                     </div>
                   </div>
                   <div className="mt-2 text-center">
-                    <span className="text-sm font-medium text-blue-600">Calorie Goals Met</span>
+                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Calorie Goals Met</span>
                     <p className="text-xs text-muted-foreground">Daily targets achieved</p>
                   </div>
                 </div>
