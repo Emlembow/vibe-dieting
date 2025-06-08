@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
   CalendarIcon,
   Loader2,
@@ -29,6 +30,7 @@ import {
   Sparkles,
   Pencil,
   QrCode,
+  ChevronDown,
 } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -40,7 +42,8 @@ import Image from "next/image"
 
 // Add the import for the HighlightMatch component at the top of the file
 import { HighlightMatch } from "@/components/highlight-match"
-import { BarcodeScanner } from "@/components/barcode-scanner"
+import { BarcodePhotoScanner } from "@/components/barcode-photo-scanner"
+import { BarcodeScannerImproved } from "@/components/barcode-scanner-improved"
 
 interface SmartFoodSuggestion extends FoodEntry {
   score: number
@@ -80,6 +83,7 @@ export default function AddFoodPage() {
   // Barcode scanner states
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isLookingUpBarcode, setIsLookingUpBarcode] = useState(false)
+  const [scannerType, setScannerType] = useState<'photo' | 'realtime'>('photo')
 
   // Fetch and sort recent foods with smart algorithm
   useEffect(() => {
@@ -922,24 +926,44 @@ export default function AddFoodPage() {
                       "Search"
                     )}
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsScannerOpen(true)}
-                    disabled={isSearching || isLookingUpBarcode}
-                    className="flex-shrink-0"
-                  >
-                    {isLookingUpBarcode ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Looking up...
-                      </>
-                    ) : (
-                      <>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        disabled={isSearching || isLookingUpBarcode}
+                        className="flex-shrink-0"
+                      >
+                        {isLookingUpBarcode ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Looking up...
+                          </>
+                        ) : (
+                          <>
+                            <QrCode className="mr-2 h-4 w-4" />
+                            Scan
+                            <ChevronDown className="ml-1 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => {
+                        setScannerType('photo')
+                        setIsScannerOpen(true)
+                      }}>
+                        <Camera className="mr-2 h-4 w-4" />
+                        Take Photo (Recommended)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        setScannerType('realtime')
+                        setIsScannerOpen(true)
+                      }}>
                         <QrCode className="mr-2 h-4 w-4" />
-                        Scan
-                      </>
-                    )}
-                  </Button>
+                        Real-time Scan
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
 
                 {error && (
@@ -1232,11 +1256,19 @@ export default function AddFoodPage() {
         </Card>
       )}
 
-      <BarcodeScanner
-        isOpen={isScannerOpen}
-        onClose={() => setIsScannerOpen(false)}
-        onBarcodeScanned={handleBarcodeScanned}
-      />
+      {scannerType === 'photo' ? (
+        <BarcodePhotoScanner
+          isOpen={isScannerOpen}
+          onClose={() => setIsScannerOpen(false)}
+          onBarcodeScanned={handleBarcodeScanned}
+        />
+      ) : (
+        <BarcodeScannerImproved
+          isOpen={isScannerOpen}
+          onClose={() => setIsScannerOpen(false)}
+          onBarcodeScanned={handleBarcodeScanned}
+        />
+      )}
     </div>
   )
 }
