@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/context/auth-context"
 import { supabase } from "@/lib/supabase"
-import type { MacroGoal, FoodEntry } from "@/types/database"
+import type { MacroGoal, FoodEntry, YoloDay } from "@/types/database"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, ReferenceLine } from "recharts"
 
 type TrendData = {
@@ -22,6 +22,7 @@ type TrendData = {
   protein: number
   carbs: number
   fat: number
+  isYoloDay?: boolean
 }
 
 type TrendSummary = {
@@ -80,6 +81,23 @@ export default function TrendsPage() {
           throw new Error("Failed to fetch trend data")
         }
 
+        // Fetch YOLO days for the date range
+        const { data: yoloDaysData, error: yoloDaysError } = await supabase
+          .from("yolo_days")
+          .select("*")
+          .eq("user_id", user.id)
+          .gte("date", startDateStr)
+          .lte("date", endDateStr)
+
+        if (yoloDaysError) {
+          console.error("Error fetching YOLO days:", yoloDaysError)
+        }
+
+        // Create a set of YOLO day dates for quick lookup
+        const yoloDayDates = new Set(
+          yoloDaysData?.map((yoloDay: YoloDay) => yoloDay.date) || []
+        )
+
         // Fetch user's macro goals
         const { data: goalData, error: goalError } = await supabase
           .from("macro_goals")
@@ -97,13 +115,17 @@ export default function TrendsPage() {
         const daysInRange = eachDayOfInterval({ start: dateRange.from, end: dateRange.to })
 
         // Initialize daily totals with zeros
-        const dailyTotals: TrendData[] = daysInRange.map((day) => ({
-          date: format(day, "MMM dd"),
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-        }))
+        const dailyTotals: TrendData[] = daysInRange.map((day) => {
+          const dateStr = format(day, "yyyy-MM-dd")
+          return {
+            date: format(day, "MMM dd"),
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            isYoloDay: yoloDayDates.has(dateStr),
+          }
+        })
 
         // Sum up the entries for each day
         if (entriesData && entriesData.length > 0) {
@@ -123,20 +145,25 @@ export default function TrendsPage() {
         }
 
         // Calculate summary statistics
-        const daysWithData = dailyTotals.filter((day) => day.calories > 0)
+        // Include YOLO days as days with data (they count as completed days)
+        const daysWithData = dailyTotals.filter((day) => day.calories > 0 || day.isYoloDay)
         const totalDays = daysWithData.length || 1
+
+        // For averages, exclude YOLO days (they have 0 calories but that's not representative)
+        const daysWithActualData = daysWithData.filter((day) => !day.isYoloDay && day.calories > 0)
+        const avgDays = daysWithActualData.length || 1
 
         const summary: TrendSummary = {
           avgCalories: Math.round(
-            daysWithData.reduce((sum, day) => sum + day.calories, 0) / totalDays
+            daysWithActualData.reduce((sum, day) => sum + day.calories, 0) / avgDays
           ),
           avgProtein: Math.round(
-            daysWithData.reduce((sum, day) => sum + day.protein, 0) / totalDays
+            daysWithActualData.reduce((sum, day) => sum + day.protein, 0) / avgDays
           ),
           avgCarbs: Math.round(
-            daysWithData.reduce((sum, day) => sum + day.carbs, 0) / totalDays
+            daysWithActualData.reduce((sum, day) => sum + day.carbs, 0) / avgDays
           ),
-          avgFat: Math.round(daysWithData.reduce((sum, day) => sum + day.fat, 0) / totalDays),
+          avgFat: Math.round(daysWithActualData.reduce((sum, day) => sum + day.fat, 0) / avgDays),
           proteinPercentage: 0,
           carbsPercentage: 0,
           fatPercentage: 0,
@@ -173,10 +200,18 @@ export default function TrendsPage() {
           let fatGoalDays = 0
 
           daysWithData.forEach((day) => {
-            if (day.calories >= goalData.daily_calorie_goal * 0.9) calorieGoalDays++
-            if (day.protein >= proteinTarget * 0.9) proteinGoalDays++
-            if (day.carbs >= carbsTarget * 0.9) carbsGoalDays++
-            if (day.fat >= fatTarget * 0.9) fatGoalDays++
+            // YOLO days count as meeting all goals
+            if (day.isYoloDay) {
+              calorieGoalDays++
+              proteinGoalDays++
+              carbsGoalDays++
+              fatGoalDays++
+            } else {
+              if (day.calories >= goalData.daily_calorie_goal * 0.9) calorieGoalDays++
+              if (day.protein >= proteinTarget * 0.9) proteinGoalDays++
+              if (day.carbs >= carbsTarget * 0.9) carbsGoalDays++
+              if (day.fat >= fatTarget * 0.9) fatGoalDays++
+            }
           })
 
           summary.calorieGoalMet = Math.round((calorieGoalDays / totalDays) * 100)
@@ -359,12 +394,48 @@ export default function TrendsPage() {
                         stroke="hsl(var(--muted-foreground))"
                       />
                       <Tooltip 
-                        formatter={(value: number) => [`${value} cal`, 'Calories']}
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--background))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload
+                            if (data.isYoloDay) {
+                              return (
+                                <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                  <div className="grid gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex flex-col">
+                                        <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                          {label}
+                                        </span>
+                                        <span className="font-bold text-pink-500">
+                                          YOLO Day! 🎉
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                          No tracking needed
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return (
+                              <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                <div className="grid gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex flex-col">
+                                      <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                        {label}
+                                      </span>
+                                      <span className="font-bold">
+                                        {payload[0].value} cal
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          }
+                          return null
                         }}
                       />
                       {macroGoal && (
@@ -386,7 +457,36 @@ export default function TrendsPage() {
                         dataKey="calories"
                         stroke="#3b82f6"
                         strokeWidth={3}
-                        dot={{ fill: "#3b82f6", strokeWidth: 2, r: 5 }}
+                        dot={(props: any) => {
+                          const { cx, cy, payload } = props
+                          if (payload.isYoloDay) {
+                            // Star shape for YOLO days
+                            const size = 6
+                            const innerRadius = size * 0.4
+                            const points = []
+                            
+                            for (let i = 0; i < 10; i++) {
+                              const angle = (i * Math.PI) / 5 - Math.PI / 2
+                              const radius = i % 2 === 0 ? size : innerRadius
+                              const x = cx + radius * Math.cos(angle)
+                              const y = cy + radius * Math.sin(angle)
+                              points.push(`${x},${y}`)
+                            }
+                            
+                            return (
+                              <g>
+                                <polygon 
+                                  points={points.join(' ')} 
+                                  fill="#ec4899" 
+                                  stroke="#ec4899"
+                                  strokeWidth="1"
+                                />
+                                <title>YOLO Day!</title>
+                              </g>
+                            )
+                          }
+                          return <circle cx={cx} cy={cy} r={5} fill="#3b82f6" strokeWidth={2} />
+                        }}
                         activeDot={{ r: 7, fill: "#1d4ed8" }}
                       />
                     </LineChart>

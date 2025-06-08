@@ -3,7 +3,7 @@
 import { createServerClient } from "@/lib/supabase"
 import { cookies } from "next/headers"
 import { format, eachDayOfInterval, parseISO } from "date-fns"
-import type { FoodEntry, MacroGoal } from "@/types/database"
+import type { FoodEntry, MacroGoal, YoloDay } from "@/types/database"
 
 export type TrendData = {
   date: string
@@ -11,6 +11,7 @@ export type TrendData = {
   protein: number
   carbs: number
   fat: number
+  isYoloDay?: boolean
 }
 
 export type TrendSummary = {
@@ -50,6 +51,23 @@ export async function getTrendData(startDate: Date, endDate: Date, userId: strin
     throw new Error("Failed to fetch trend data")
   }
 
+  // Fetch YOLO days for the date range
+  const { data: yoloDaysData, error: yoloDaysError } = await supabase
+    .from("yolo_days")
+    .select("*")
+    .eq("user_id", userId)
+    .gte("date", startDateStr)
+    .lte("date", endDateStr)
+
+  if (yoloDaysError) {
+    console.error("Error fetching YOLO days:", yoloDaysError)
+  }
+
+  // Create a set of YOLO day dates for quick lookup
+  const yoloDayDates = new Set(
+    yoloDaysData?.map((yoloDay: YoloDay) => yoloDay.date) || []
+  )
+
   // Fetch user's macro goals
   const { data: goalData, error: goalError } = await supabase
     .from("macro_goals")
@@ -67,13 +85,17 @@ export async function getTrendData(startDate: Date, endDate: Date, userId: strin
   const daysInRange = eachDayOfInterval({ start: startDate, end: endDate })
 
   // Initialize daily totals with zeros
-  const dailyTotals: TrendData[] = daysInRange.map((day) => ({
-    date: format(day, "MMM dd"),
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-  }))
+  const dailyTotals: TrendData[] = daysInRange.map((day) => {
+    const dateStr = format(day, "yyyy-MM-dd")
+    return {
+      date: format(day, "MMM dd"),
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+      isYoloDay: yoloDayDates.has(dateStr),
+    }
+  })
 
   // Sum up the entries for each day
   if (entriesData && entriesData.length > 0) {
@@ -93,20 +115,25 @@ export async function getTrendData(startDate: Date, endDate: Date, userId: strin
   }
 
   // Calculate summary statistics
-  const daysWithData = dailyTotals.filter((day) => day.calories > 0)
+  // Include YOLO days as days with data (they count as completed days)
+  const daysWithData = dailyTotals.filter((day) => day.calories > 0 || day.isYoloDay)
   const totalDays = daysWithData.length || 1
+
+  // For averages, exclude YOLO days (they have 0 calories but that's not representative)
+  const daysWithActualData = daysWithData.filter((day) => !day.isYoloDay && day.calories > 0)
+  const avgDays = daysWithActualData.length || 1
 
   const summary: TrendSummary = {
     avgCalories: Math.round(
-      daysWithData.reduce((sum, day) => sum + day.calories, 0) / totalDays
+      daysWithActualData.reduce((sum, day) => sum + day.calories, 0) / avgDays
     ),
     avgProtein: Math.round(
-      daysWithData.reduce((sum, day) => sum + day.protein, 0) / totalDays
+      daysWithActualData.reduce((sum, day) => sum + day.protein, 0) / avgDays
     ),
     avgCarbs: Math.round(
-      daysWithData.reduce((sum, day) => sum + day.carbs, 0) / totalDays
+      daysWithActualData.reduce((sum, day) => sum + day.carbs, 0) / avgDays
     ),
-    avgFat: Math.round(daysWithData.reduce((sum, day) => sum + day.fat, 0) / totalDays),
+    avgFat: Math.round(daysWithActualData.reduce((sum, day) => sum + day.fat, 0) / avgDays),
     proteinPercentage: 0,
     carbsPercentage: 0,
     fatPercentage: 0,
@@ -141,10 +168,18 @@ export async function getTrendData(startDate: Date, endDate: Date, userId: strin
     let fatGoalDays = 0
 
     daysWithData.forEach((day) => {
-      if (day.calories >= goalData.daily_calorie_goal * 0.9) calorieGoalDays++
-      if (day.protein >= proteinTarget * 0.9) proteinGoalDays++
-      if (day.carbs >= carbsTarget * 0.9) carbsGoalDays++
-      if (day.fat >= fatTarget * 0.9) fatGoalDays++
+      // YOLO days count as meeting all goals
+      if (day.isYoloDay) {
+        calorieGoalDays++
+        proteinGoalDays++
+        carbsGoalDays++
+        fatGoalDays++
+      } else {
+        if (day.calories >= goalData.daily_calorie_goal * 0.9) calorieGoalDays++
+        if (day.protein >= proteinTarget * 0.9) proteinGoalDays++
+        if (day.carbs >= carbsTarget * 0.9) carbsGoalDays++
+        if (day.fat >= fatTarget * 0.9) fatGoalDays++
+      }
     })
 
     summary.calorieGoalMet = Math.round((calorieGoalDays / totalDays) * 100)
