@@ -1,7 +1,7 @@
 "use server"
 
 import { createServerClient } from "@/lib/supabase"
-import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 import { format, eachDayOfInterval, parseISO } from "date-fns"
 import type { FoodEntry, MacroGoal } from "@/types/database"
 
@@ -28,9 +28,14 @@ export type TrendSummary = {
   totalDays: number
 }
 
-export async function getTrendData(startDate: Date, endDate: Date, userId: string) {
-  // Use service role client for server actions
+export async function getTrendData(startDate: Date, endDate: Date) {
   const supabase = createServerClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+    redirect('/login')
+  }
 
   // Format dates for Supabase query
   const startDateStr = format(startDate, "yyyy-MM-dd")
@@ -40,7 +45,7 @@ export async function getTrendData(startDate: Date, endDate: Date, userId: strin
   const { data: entriesData, error: entriesError } = await supabase
     .from("food_entries")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", user.id)
     .gte("date", startDateStr)
     .lte("date", endDateStr)
     .order("date", { ascending: true })
@@ -54,7 +59,7 @@ export async function getTrendData(startDate: Date, endDate: Date, userId: strin
   const { data: goalData, error: goalError } = await supabase
     .from("macro_goals")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
     .single()
