@@ -27,25 +27,34 @@ jest.mock('next/navigation', () => {
   }
 })
 
-// Mock Supabase client with proper promise returns
+// Mock Supabase client with basic structure
 jest.mock('@/lib/supabase', () => {
-  // Create a chainable mock that implements thenable pattern
+  // Simple chainable mock that tests can override
   const createMockQueryBuilder = () => {
-    const mockBuilder = {
-      select: jest.fn().mockReturnThis(),
-      insert: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      delete: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      order: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      gte: jest.fn().mockReturnThis(),
-      lte: jest.fn().mockReturnThis(),
-      // Make it thenable for async/await
-      then: jest.fn((resolve) => resolve({ data: null, error: null })),
-      catch: jest.fn(),
-    }
+    const mockBuilder = {}
+    
+    // Add methods that return the builder for chaining
+    mockBuilder.select = jest.fn(() => mockBuilder)
+    mockBuilder.insert = jest.fn(() => mockBuilder)
+    mockBuilder.update = jest.fn(() => mockBuilder)
+    mockBuilder.delete = jest.fn(() => mockBuilder)
+    mockBuilder.eq = jest.fn(() => mockBuilder)
+    mockBuilder.order = jest.fn(() => mockBuilder)
+    mockBuilder.limit = jest.fn(() => mockBuilder)
+    mockBuilder.gte = jest.fn(() => mockBuilder)
+    mockBuilder.lte = jest.fn(() => mockBuilder)
+    mockBuilder.catch = jest.fn(() => mockBuilder)
+    
+    // Terminal methods that return promises
+    mockBuilder.single = jest.fn(() => Promise.resolve({ data: null, error: null }))
+    
+    // Make it thenable for async/await
+    mockBuilder.then = jest.fn((resolve) => {
+      if (resolve) {
+        return resolve({ data: [], error: null })
+      }
+      return Promise.resolve({ data: [], error: null })
+    })
     
     return mockBuilder
   }
@@ -53,10 +62,16 @@ jest.mock('@/lib/supabase', () => {
   return {
     supabase: {
       auth: {
-        signInWithPassword: jest.fn().mockResolvedValue({ data: null, error: null }),
+        signInWithPassword: jest.fn().mockResolvedValue({ 
+          data: { user: { id: 'test-user-id' }, session: null }, 
+          error: null 
+        }),
         signUp: jest.fn().mockResolvedValue({ data: null, error: null }),
         signOut: jest.fn().mockResolvedValue({ error: null }),
-        getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
+        getSession: jest.fn().mockResolvedValue({ 
+          data: { session: { user: { id: 'test-user-id' } } }, 
+          error: null 
+        }),
         onAuthStateChange: jest.fn(),
       },
       from: jest.fn(() => createMockQueryBuilder()),
@@ -93,7 +108,9 @@ beforeAll(() => {
   console.error = (...args) => {
     if (
       typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render')
+      (args[0].includes('Warning: ReactDOM.render') ||
+       args[0].includes('Warning: An update to') ||
+       args[0].includes('act(...)'))
     ) {
       return
     }

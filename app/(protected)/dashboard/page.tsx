@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useRouter } from "next/navigation"
 import { format, subDays, parseISO, eachDayOfInterval } from "date-fns"
-import { CalendarIcon, Plus, Trash2, ArrowRight, Settings, Clock, Pencil, PartyPopper } from "lucide-react"
+import { CalendarIcon, Plus, Trash2, ArrowRight, Settings, Clock, Pencil, Star } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useToast } from "@/components/ui/use-toast"
@@ -471,9 +471,9 @@ export default function DashboardPage() {
                     onClick={() => setIsYoloDayDialogOpen(true)}
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-pink-500 hover:bg-pink-500/10"
+                    className="text-purple-500 hover:text-purple-600 hover:bg-purple-500/10"
                   >
-                    <PartyPopper className="mr-2 h-4 w-4" />
+                    <Star className="mr-2 h-4 w-4 fill-purple-500" />
                     <span className="hidden sm:inline">YOLO Day</span>
                   </Button>
                 )}

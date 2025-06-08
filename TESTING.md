@@ -36,11 +36,6 @@ This project has comprehensive testing coverage including unit tests, integratio
 - CRUD operations
 - Component interactions
 
-### 3. End-to-End Tests (Playwright)
-- Complete user workflows
-- Cross-browser compatibility
-- Mobile responsiveness
-- Performance validation
 
 ## Running Tests
 
@@ -59,20 +54,6 @@ npm run test:coverage
 npm run test:ci
 ```
 
-### End-to-End Tests
-```bash
-# Run E2E tests
-npm run test:e2e
-
-# Run E2E tests with UI
-npm run test:e2e:ui
-
-# Run E2E tests in specific browser
-npx playwright test --browser=firefox
-
-# Run E2E tests in headed mode (see browser)
-npx playwright test --headed
-```
 
 ### Specific Test Suites
 ```bash
@@ -88,12 +69,7 @@ npm test -- --testPathPattern="dashboard"
 
 ## Test Coverage
 
-The project maintains high test coverage standards:
-
-- **Branches**: 70% minimum
-- **Functions**: 70% minimum  
-- **Lines**: 70% minimum
-- **Statements**: 70% minimum
+The project applies test coverage based on component criticality and business value. Critical features and components that handle user data, authentication, or core business logic receive comprehensive test coverage, while utility components and UI elements are tested based on their complexity and risk profile.
 
 ### Viewing Coverage
 ```bash
@@ -128,21 +104,6 @@ describe('Login Page', () => {
 })
 ```
 
-### E2E Test Example
-```typescript
-import { test, expect } from '@playwright/test'
-
-test('should add food entry', async ({ page }) => {
-  await page.goto('/add-food')
-  
-  await page.fill('input[placeholder*="food name"]', 'Apple')
-  await page.fill('input[placeholder*="calories"]', '95')
-  await page.click('button:has-text("Add Entry")')
-  
-  await expect(page).toHaveURL(/.*\/dashboard/)
-  await expect(page.locator('text=Apple')).toBeVisible()
-})
-```
 
 ## Test Utilities
 
@@ -210,10 +171,8 @@ Tests run automatically on:
 ### CI Pipeline Stages
 1. **Lint and Type Check** - Code quality validation
 2. **Unit Tests** - Component and logic testing
-3. **E2E Tests** - Full application testing
-4. **Security Scan** - Vulnerability detection
-5. **Performance Tests** - Lighthouse audits
-6. **Build and Deploy** - Production deployment
+3. **Security Scan** - Vulnerability detection
+4. **Build and Deploy** - Production deployment
 
 ## Test Environment Setup
 
@@ -222,12 +181,10 @@ Tests run automatically on:
 # Install dependencies
 npm ci
 
-# Install Playwright browsers (for E2E tests)
-npx playwright install --with-deps
 ```
 
 ### Environment Variables
-For E2E tests that require API access, set up test environment variables:
+For tests that require API access, set up test environment variables:
 
 ```bash
 # .env.test.local
@@ -246,17 +203,6 @@ npm test -- --testPathPattern="login" --verbose
 node --inspect-brk node_modules/.bin/jest --runInBand
 ```
 
-### Playwright Tests
-```bash
-# Run with browser visible
-npx playwright test --headed
-
-# Debug specific test
-npx playwright test --debug auth.spec.ts
-
-# Generate and view test report
-npx playwright show-report
-```
 
 ## Best Practices
 
@@ -278,11 +224,6 @@ npx playwright show-report
 npm install --save-dev @testing-library/dom
 ```
 
-#### E2E tests timing out
-```bash
-# Increase timeout in playwright.config.ts
-timeout: 60000
-```
 
 #### Mock issues
 Check `jest.setup.js` for proper mock configuration.
@@ -293,7 +234,6 @@ Add tests for uncovered branches and functions.
 ## Performance
 
 ### Test Performance Tips
-- Use `test.concurrent` for independent Playwright tests
 - Mock heavy operations in unit tests
 - Use `beforeAll` for expensive setup operations
 - Consider test sharding for large test suites
