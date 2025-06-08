@@ -1,5 +1,10 @@
 # Next.js Macro Tracker Project Guidelines
 
+# CRITICAL: Git Workflow Rules
+**NEVER commit directly to main branch!**
+**ALWAYS create a feature branch and pull request!**
+**DEFAULT BEHAVIOR: Follow Git flow for ALL changes!**
+
 ## Next.js Development Standards
 
 ### Project Structure
@@ -78,9 +83,17 @@
 
 ## Git Workflow
 
+### Critical Rules for Claude
+- **NEVER use `git push origin main` directly**
+- **ALWAYS create a feature branch first**
+- **ALWAYS create a PR instead of direct commits to main**
+- **When user says "update github" or "push changes", create a PR, don't push to main**
+- **Direct commits to develop branch are allowed only when explicitly requested**
+- **DEFAULT: Create feature branch and PR for ALL changes**
+
 ### Branch Management
 - Use Gitflow workflow
-- Branch from develop for features
+- Branch from develop for features (or main if no develop branch exists)
 - Use naming convention: `feature/descriptive-name`
 - Keep branches up-to-date before creating PRs
 - Delete branches after merge
@@ -90,13 +103,15 @@
 - Types: feat, fix, docs, style, refactor, test, chore
 - Use semantic versioning
 - Write clear, descriptive commit messages
+- Include PR creation command in workflow
 
 ### Pull Request Process
-- All changes must go through Pull Requests
+- All changes must go through Pull Requests (except develop when explicitly allowed)
 - Required approvals: minimum 1
 - CI checks must pass
-- No direct commits to protected branches
+- No direct commits to main branch EVER
 - Branch must be up to date before merging
+- Use `gh pr create` to create PRs programmatically
 
 ## Code Quality Standards
 
@@ -130,4 +145,34 @@
 - Organize code in logical hierarchy
 - Refactor continuously
 - Fix technical debt early
-- Leave code cleaner than you found it 
+- Leave code cleaner than you found it
+
+## Important Reminders for Claude
+
+### Git Workflow is MANDATORY
+1. When making any code changes, ALWAYS:
+   - Create a feature branch: `git checkout -b feature/descriptive-name`
+   - Make commits on the feature branch
+   - Push the feature branch: `git push -u origin feature/descriptive-name`
+   - Create a PR: `gh pr create --title "..." --body "..."`
+
+2. NEVER:
+   - Push directly to main: ❌ `git push origin main`
+   - Commit directly to main without PR
+   - Assume "update github" means push to main
+
+3. EXCEPTIONS:
+   - Direct commits to develop branch ONLY when user explicitly says "commit to develop"
+   - All other cases: create feature branch and PR
+
+### When User Says "Update GitHub" or "Push Changes"
+This means: Create a feature branch and PR, NOT push to main!
+
+### Default Workflow for Any Changes:
+```bash
+git checkout -b feature/description
+git add .
+git commit -m "type: description"
+git push -u origin feature/description
+gh pr create
+```
