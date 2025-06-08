@@ -4,10 +4,6 @@ import DashboardClient from "./dashboard-client"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
-interface DashboardPageProps {
-  searchParams: Promise<{ date?: string }>
-}
-
 function DashboardSkeleton() {
   return (
     <div className="space-y-8">
@@ -39,7 +35,11 @@ function DashboardSkeleton() {
   )
 }
 
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage({ 
+  searchParams 
+}: {
+  searchParams: Promise<{ date?: string }>
+}) {
   const resolvedSearchParams = await searchParams
   const selectedDate = resolvedSearchParams.date ? new Date(resolvedSearchParams.date) : new Date()
   
