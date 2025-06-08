@@ -38,9 +38,10 @@ export default function TrendsClient({
   const [interval, setInterval] = useState(initialInterval)
   const router = useRouter()
 
-  const handleDateChange = (range: { from: Date; to: Date } | undefined) => {
+  const handleDateChange = (range: { from?: Date; to?: Date } | undefined) => {
     if (range?.from && range?.to) {
-      setDateRange(range)
+      const newRange = { from: range.from, to: range.to }
+      setDateRange(newRange)
       const params = new URLSearchParams()
       params.set('from', format(range.from, 'yyyy-MM-dd'))
       params.set('to', format(range.to, 'yyyy-MM-dd'))

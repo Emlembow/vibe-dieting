@@ -332,10 +332,10 @@ export default function DashboardClient({
                         <div className="font-medium truncate">{entry.name}</div>
                         <div className="text-sm text-muted-foreground">
                           <span>{entry.calories} cal</span>
-                          {entry.brand && (
+                          {entry.description && (
                             <>
                               <span className="mx-2">•</span>
-                              <span>{entry.brand}</span>
+                              <span>{entry.description}</span>
                             </>
                           )}
                         </div>
@@ -383,10 +383,20 @@ export default function DashboardClient({
       <Suspense fallback={null}>
         {isEditDialogOpen && selectedFoodEntry && (
           <EditFoodDialog
-            open={isEditDialogOpen}
-            onOpenChange={setIsEditDialogOpen}
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
             foodEntry={selectedFoodEntry}
-            onUpdate={(updates) => handleUpdateEntry(selectedFoodEntry.id, updates)}
+            onFoodUpdated={(updatedFood) => {
+              setFoodEntries(prev => prev.map(entry => 
+                entry.id === updatedFood.id ? updatedFood : entry
+              ))
+              setIsEditDialogOpen(false)
+              toast({
+                title: "Food entry updated",
+                description: "Your changes have been saved.",
+              })
+              router.refresh()
+            }}
           />
         )}
       </Suspense>
@@ -394,8 +404,10 @@ export default function DashboardClient({
       <Suspense fallback={null}>
         {isYoloDayDialogOpen && (
           <YoloDayDialog
-            open={isYoloDayDialogOpen}
-            onOpenChange={setIsYoloDayDialogOpen}
+            isOpen={isYoloDayDialogOpen}
+            onClose={() => setIsYoloDayDialogOpen(false)}
+            onConfirm={() => setIsYoloDayDialogOpen(false)}
+            date={date}
           />
         )}
       </Suspense>

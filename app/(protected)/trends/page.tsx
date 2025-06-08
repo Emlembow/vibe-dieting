@@ -6,11 +6,11 @@ import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface TrendsPageProps {
-  searchParams: { 
+  searchParams: Promise<{ 
     from?: string
     to?: string
     interval?: "day" | "week" | "month"
-  }
+  }>
 }
 
 function TrendsSkeleton() {
@@ -53,9 +53,10 @@ function TrendsSkeleton() {
 }
 
 export default async function TrendsPage({ searchParams }: TrendsPageProps) {
-  const fromDate = searchParams.from ? new Date(searchParams.from) : subDays(new Date(), 7)
-  const toDate = searchParams.to ? new Date(searchParams.to) : new Date()
-  const interval = searchParams.interval || "day"
+  const resolvedSearchParams = await searchParams
+  const fromDate = resolvedSearchParams.from ? new Date(resolvedSearchParams.from) : subDays(new Date(), 7)
+  const toDate = resolvedSearchParams.to ? new Date(resolvedSearchParams.to) : new Date()
+  const interval = resolvedSearchParams.interval || "day"
 
   const { dailyTotals, summary, macroGoal } = await getTrendData(fromDate, toDate)
 

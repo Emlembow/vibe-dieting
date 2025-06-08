@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface DashboardPageProps {
-  searchParams: { date?: string }
+  searchParams: Promise<{ date?: string }>
 }
 
 function DashboardSkeleton() {
@@ -40,7 +40,8 @@ function DashboardSkeleton() {
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const selectedDate = searchParams.date ? new Date(searchParams.date) : new Date()
+  const resolvedSearchParams = await searchParams
+  const selectedDate = resolvedSearchParams.date ? new Date(resolvedSearchParams.date) : new Date()
   
   const [dashboardData, weeklyData] = await Promise.all([
     getDashboardData(selectedDate),
