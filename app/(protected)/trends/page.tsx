@@ -286,26 +286,26 @@ export default function TrendsPage() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-blue-200 dark:border-blue-800">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Average Calories</p>
-                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{summary.avgCalories.toLocaleString()}</p>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">per day</p>
+                  <p className="text-2xl font-bold">{summary.avgCalories.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">per day</p>
                 </div>
                 <Activity className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600 dark:text-green-400">Average Protein</p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">{summary.avgProtein}g</p>
-                  <Badge variant="outline" className="text-xs border-green-300 text-green-600 dark:border-green-700 dark:text-green-400">
+                  <p className="text-2xl font-bold">{summary.avgProtein}g</p>
+                  <Badge variant="outline" className="text-xs">
                     {summary.proteinPercentage}% of intake
                   </Badge>
                 </div>
@@ -314,13 +314,13 @@ export default function TrendsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950 border-purple-200 dark:border-purple-800">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Average Carbs</p>
-                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{summary.avgCarbs}g</p>
-                  <Badge variant="outline" className="text-xs border-purple-300 text-purple-600 dark:border-purple-700 dark:text-purple-400">
+                  <p className="text-2xl font-bold">{summary.avgCarbs}g</p>
+                  <Badge variant="outline" className="text-xs">
                     {summary.carbsPercentage}% of intake
                   </Badge>
                 </div>
@@ -329,13 +329,13 @@ export default function TrendsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950 border-yellow-200 dark:border-yellow-800">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Average Fat</p>
-                  <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{summary.avgFat}g</p>
-                  <Badge variant="outline" className="text-xs border-yellow-300 text-yellow-600 dark:border-yellow-700 dark:text-yellow-400">
+                  <p className="text-2xl font-bold">{summary.avgFat}g</p>
+                  <Badge variant="outline" className="text-xs">
                     {summary.fatPercentage}% of intake
                   </Badge>
                 </div>
@@ -748,10 +748,11 @@ export default function TrendsPage() {
       </Tabs>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="!bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900 border-slate-200 dark:border-slate-700">
+        {/* Macro Distribution - Simple Version */}
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+              <Target className="h-5 w-5" />
               Macro Distribution
             </CardTitle>
             <CardDescription>Average macronutrient breakdown for selected period</CardDescription>
@@ -762,90 +763,39 @@ export default function TrendsPage() {
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
               </div>
             ) : summary ? (
-              <>
-                <div className="flex justify-center">
-                  <div className="relative h-[200px] w-[200px]">
-                    {/* SVG Donut Chart */}
-                    <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90 drop-shadow-lg">
-                      {/* Background circle */}
-                      <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
-
-                      {/* Protein segment */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="none"
-                        stroke="#10b981"
-                        strokeWidth="10"
-                        strokeDasharray={`${(summary.proteinPercentage * 251.2) / 100} 251.2`}
-                        strokeLinecap="round"
-                        className="transition-all duration-500"
-                      />
-
-                      {/* Carbs segment */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="none"
-                        stroke="#8b5cf6"
-                        strokeWidth="10"
-                        strokeDasharray={`${(summary.carbsPercentage * 251.2) / 100} 251.2`}
-                        strokeDashoffset={`-${(summary.proteinPercentage * 251.2) / 100}`}
-                        strokeLinecap="round"
-                        className="transition-all duration-500"
-                      />
-
-                      {/* Fat segment */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="none"
-                        stroke="#eab308"
-                        strokeWidth="10"
-                        strokeDasharray={`${(summary.fatPercentage * 251.2) / 100} 251.2`}
-                        strokeDashoffset={`-${((summary.proteinPercentage + summary.carbsPercentage) * 251.2) / 100}`}
-                        strokeLinecap="round"
-                        className="transition-all duration-500"
-                      />
-                    </svg>
-
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">{summary.avgCalories.toLocaleString()}</span>
-                      <span className="text-xs text-slate-600 dark:text-slate-400">avg. calories</span>
-                    </div>
-                  </div>
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold">{summary.avgCalories.toLocaleString()}</div>
+                  <div className="text-sm text-muted-foreground">avg. calories</div>
                 </div>
-
-                <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-                  <div className="bg-slate-100/50 dark:bg-slate-800/80 rounded-lg p-3 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
-                    <div className="flex items-center justify-center mb-2">
+                
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center">
                       <div className="h-3 w-3 rounded-full bg-green-500 mr-1.5"></div>
-                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Protein</span>
+                      <span className="text-sm font-medium">Protein</span>
                     </div>
                     <div className="text-2xl font-bold text-green-600 dark:text-green-400">{summary.proteinPercentage}%</div>
                     <div className="text-xs text-muted-foreground">{summary.avgProtein}g avg.</div>
                   </div>
-                  <div className="bg-slate-100/50 dark:bg-slate-800/80 rounded-lg p-3 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
-                    <div className="flex items-center justify-center mb-2">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center">
                       <div className="h-3 w-3 rounded-full bg-purple-500 mr-1.5"></div>
-                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Carbs</span>
+                      <span className="text-sm font-medium">Carbs</span>
                     </div>
                     <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{summary.carbsPercentage}%</div>
                     <div className="text-xs text-muted-foreground">{summary.avgCarbs}g avg.</div>
                   </div>
-                  <div className="bg-slate-100/50 dark:bg-slate-800/80 rounded-lg p-3 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
-                    <div className="flex items-center justify-center mb-2">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center">
                       <div className="h-3 w-3 rounded-full bg-yellow-500 mr-1.5"></div>
-                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Fat</span>
+                      <span className="text-sm font-medium">Fat</span>
                     </div>
                     <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{summary.fatPercentage}%</div>
                     <div className="text-xs text-muted-foreground">{summary.avgFat}g avg.</div>
                   </div>
                 </div>
-              </>
+              </div>
             ) : (
               <div className="flex h-[300px] flex-col items-center justify-center text-muted-foreground">
                 <Target className="h-12 w-12 mb-4 opacity-50" />
@@ -856,10 +806,11 @@ export default function TrendsPage() {
           </CardContent>
         </Card>
 
-        <Card className="!bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 border-emerald-200 dark:border-emerald-700">
+        {/* Goal Completion - Simple Version */}
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <TrendingUp className="h-5 w-5" />
               Goal Completion
             </CardTitle>
             <CardDescription>How often you've met your nutrition goals (within 90% of target)</CardDescription>
@@ -870,40 +821,19 @@ export default function TrendsPage() {
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
               </div>
             ) : summary && macroGoal ? (
-              <div className="grid grid-cols-2 gap-6">
-                <div className="flex flex-col items-center justify-center">
-                  <div className="relative h-32 w-32">
-                    <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90 drop-shadow-lg">
-                      <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="10"
-                        strokeDasharray={`${(summary.calorieGoalMet * 251.2) / 100} 251.2`}
-                        strokeLinecap="round"
-                        className="transition-all duration-500"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{summary.calorieGoalMet}%</span>
-                      <span className="text-xs text-muted-foreground">of days</span>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-center">
-                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Calorie Goals Met</span>
-                    <p className="text-xs text-muted-foreground">Daily targets achieved</p>
-                  </div>
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{summary.calorieGoalMet}%</div>
+                  <div className="text-sm text-muted-foreground">of days</div>
+                  <div className="text-sm font-medium text-blue-600 dark:text-blue-400">Calorie Goals Met</div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="bg-slate-100/50 dark:bg-slate-800/80 rounded-lg p-3 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
+                <div className="space-y-4">
+                  <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-green-500 mr-1.5"></div>
-                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Protein</span>
+                        <span className="text-sm font-medium">Protein</span>
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {summary.proteinGoalMet}%
@@ -917,11 +847,11 @@ export default function TrendsPage() {
                     </div>
                   </div>
 
-                  <div className="bg-slate-100/50 dark:bg-slate-800/80 rounded-lg p-3 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
+                  <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-purple-500 mr-1.5"></div>
-                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Carbs</span>
+                        <span className="text-sm font-medium">Carbs</span>
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {summary.carbsGoalMet}%
@@ -935,11 +865,11 @@ export default function TrendsPage() {
                     </div>
                   </div>
 
-                  <div className="bg-slate-100/50 dark:bg-slate-800/80 rounded-lg p-3 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
+                  <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-yellow-500 mr-1.5"></div>
-                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Fat</span>
+                        <span className="text-sm font-medium">Fat</span>
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {summary.fatGoalMet}%
