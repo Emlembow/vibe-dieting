@@ -44,10 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       setIsLoading(false)
-
-      if (event === "SIGNED_IN") {
-        router.refresh()
-      }
     })
 
     setData()
