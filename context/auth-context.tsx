@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react"
 import type { Session, User } from "@supabase/supabase-js"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
@@ -25,14 +25,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
+    let mounted = true
+
     const setData = async () => {
       const {
         data: { session },
         error,
       } = await supabase.auth.getSession()
 
-      if (error) {
-        // Error getting session
+      if (error || !mounted) {
+        return
       }
 
       setSession(session)
@@ -41,19 +43,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+      if (!mounted) return
+      
       setSession(session)
       setUser(session?.user ?? null)
-      setIsLoading(false)
+      if (event !== 'TOKEN_REFRESHED') {
+        setIsLoading(false)
+      }
     })
 
     setData()
 
     return () => {
+      mounted = false
       authListener.subscription.unsubscribe()
     }
-  }, [router])
+  }, [])
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -71,9 +78,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error
     }
 
-  }
+  }, [])
 
-  const signUp = async (email: string, password: string, username: string) => {
+  const signUp = useCallback(async (email: string, password: string, username: string) => {
     const { error, data } = await supabase.auth.signUp({
       email,
       password,
@@ -99,21 +106,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Don't throw here, as the user is already created
       }
     }
-  }
+  }, [])
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut()
     router.push("/login")
-  }
+  }, [router])
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     session,
     isLoading,
     signIn,
     signUp,
     signOut,
-  }
+  }), [user, session, isLoading, signIn, signUp, signOut])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
