@@ -69,6 +69,7 @@ describe('Dashboard Page', () => {
       eq: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({ data: mockMacroGoal, error: null }),
       order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
       delete: jest.fn().mockReturnThis(),
@@ -90,6 +91,7 @@ describe('Dashboard Page', () => {
       eq: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({ data: mockMacroGoal, error: null }),
       order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
     }))
@@ -112,6 +114,8 @@ describe('Dashboard Page', () => {
         return {
           select: jest.fn().mockReturnThis(),
           eq: jest.fn().mockReturnThis(),
+          order: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
           single: jest.fn().mockResolvedValue({ data: mockMacroGoal, error: null }),
         }
       }

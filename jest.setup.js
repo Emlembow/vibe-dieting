@@ -27,51 +27,10 @@ jest.mock('next/navigation', () => {
   }
 })
 
-// Mock Supabase client with proper promise returns
+// Mock Supabase client with basic structure
 jest.mock('@/lib/supabase', () => {
-  // Mock data for different tables
-  const mockMacroGoal = {
-    id: 'goal-1',
-    user_id: 'test-user-id',
-    daily_calorie_goal: 2000,
-    protein_goal: 150,
-    carb_goal: 200,
-    fat_goal: 70,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }
-
-  const mockFoodEntries = [
-    {
-      id: 'food-1',
-      user_id: 'test-user-id',
-      food_name: 'Chicken Breast',
-      calories: 165,
-      protein: 31,
-      carbs: 0,
-      fat: 3.6,
-      quantity: 1,
-      unit: 'serving',
-      date: new Date().toISOString().split('T')[0],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  ]
-
-  // Create a chainable mock that implements thenable pattern
-  const createMockQueryBuilder = (tableName = '') => {
-    let currentTable = tableName
-    let currentData = null
-    
-    // Determine what data to return based on table
-    if (tableName === 'macro_goals') {
-      currentData = mockMacroGoal
-    } else if (tableName === 'food_entries') {
-      currentData = mockFoodEntries
-    } else if (tableName === 'yolo_days') {
-      currentData = null // No YOLO day by default
-    }
-
+  // Simple chainable mock that tests can override
+  const createMockQueryBuilder = () => {
     const mockBuilder = {}
     
     // Add methods that return the builder for chaining
@@ -87,21 +46,14 @@ jest.mock('@/lib/supabase', () => {
     mockBuilder.catch = jest.fn(() => mockBuilder)
     
     // Terminal methods that return promises
-    mockBuilder.single = jest.fn(() => Promise.resolve({ 
-      data: currentData, 
-      error: currentData ? null : { code: 'PGRST116', message: 'No rows found' }
-    }))
+    mockBuilder.single = jest.fn(() => Promise.resolve({ data: null, error: null }))
     
     // Make it thenable for async/await
     mockBuilder.then = jest.fn((resolve) => {
-      const result = { 
-        data: Array.isArray(currentData) ? currentData : (currentData ? [currentData] : []), 
-        error: null 
-      }
       if (resolve) {
-        return resolve(result)
+        return resolve({ data: [], error: null })
       }
-      return Promise.resolve(result)
+      return Promise.resolve({ data: [], error: null })
     })
     
     return mockBuilder
@@ -122,7 +74,7 @@ jest.mock('@/lib/supabase', () => {
         }),
         onAuthStateChange: jest.fn(),
       },
-      from: jest.fn((tableName) => createMockQueryBuilder(tableName)),
+      from: jest.fn(() => createMockQueryBuilder()),
     },
   }
 })
