@@ -28,6 +28,7 @@ import {
   Clock,
   Sparkles,
   Pencil,
+  QrCode,
 } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -39,6 +40,7 @@ import Image from "next/image"
 
 // Add the import for the HighlightMatch component at the top of the file
 import { HighlightMatch } from "@/components/highlight-match"
+import { BarcodeScanner } from "@/components/barcode-scanner"
 
 interface SmartFoodSuggestion extends FoodEntry {
   score: number
@@ -74,6 +76,10 @@ export default function AddFoodPage() {
   const [filteredRecentFoods, setFilteredRecentFoods] = useState<SmartFoodSuggestion[]>([])
   const [allFoodHistory, setAllFoodHistory] = useState<SmartFoodSuggestion[]>([])
   const [isSearchingHistory, setIsSearchingHistory] = useState(false)
+
+  // Barcode scanner states
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const [isLookingUpBarcode, setIsLookingUpBarcode] = useState(false)
 
   // Fetch and sort recent foods with smart algorithm
   useEffect(() => {
@@ -299,6 +305,7 @@ export default function AddFoodPage() {
       // Prepare the request payload
       const payload = {
         foodName: foodName.trim(),
+        searchTerms: foodName.trim(),
       }
 
       // Get the current session to include the auth token
@@ -308,7 +315,7 @@ export default function AddFoodPage() {
         throw new Error("You must be logged in to search for food")
       }
 
-      const response = await fetch("/api/nutrition", {
+      const response = await fetch("/api/nutrition/enhanced", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -334,6 +341,65 @@ export default function AddFoodPage() {
       })
     } finally {
       setIsSearching(false)
+    }
+  }
+
+  const handleBarcodeScanned = async (barcode: string) => {
+    setIsLookingUpBarcode(true)
+    setNutritionData(null)
+    setError(null)
+    setActiveTab("search") // Switch to search tab to show results
+
+    try {
+      // Get the current session to include the auth token
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        throw new Error("You must be logged in to look up products")
+      }
+
+      const response = await fetch(`/api/nutrition/barcode?barcode=${barcode}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        
+        // If barcode not found, fallback to enhanced search
+        if (response.status === 404) {
+          toast({
+            title: "Product not found",
+            description: "Barcode not in database. Try searching by product name instead.",
+            variant: "destructive",
+          })
+          setFoodName(`Barcode: ${barcode}`) // Pre-fill search field
+          return
+        }
+        
+        throw new Error(errorData.error || "Failed to lookup barcode")
+      }
+
+      const data = await response.json()
+      setNutritionData(data)
+      setFoodName(data.foodDetails.name) // Update food name field
+      
+      toast({
+        title: "Product Found!",
+        description: `Found ${data.foodDetails.name} from barcode scan`,
+      })
+    } catch (error: any) {
+      console.error("Error looking up barcode:", error)
+      setError(error.message || "Failed to lookup barcode")
+      toast({
+        title: "Barcode Lookup Failed",
+        description: error.message || "Failed to lookup barcode",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLookingUpBarcode(false)
     }
   }
 
@@ -846,7 +912,7 @@ export default function AddFoodPage() {
                       }}
                     />
                   </div>
-                  <Button onClick={handleSearch} disabled={isSearching}>
+                  <Button onClick={handleSearch} disabled={isSearching || isLookingUpBarcode}>
                     {isSearching ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -854,6 +920,24 @@ export default function AddFoodPage() {
                       </>
                     ) : (
                       "Search"
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsScannerOpen(true)}
+                    disabled={isSearching || isLookingUpBarcode}
+                    className="flex-shrink-0"
+                  >
+                    {isLookingUpBarcode ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Looking up...
+                      </>
+                    ) : (
+                      <>
+                        <QrCode className="mr-2 h-4 w-4" />
+                        Scan
+                      </>
                     )}
                   </Button>
                 </div>
@@ -1147,6 +1231,12 @@ export default function AddFoodPage() {
           </CardFooter>
         </Card>
       )}
+
+      <BarcodeScanner
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onBarcodeScanned={handleBarcodeScanned}
+      />
     </div>
   )
 }
