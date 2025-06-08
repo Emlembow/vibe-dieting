@@ -136,6 +136,7 @@ export class OpenFoodFactsClient {
         saturatedGrams: number
       }
     }
+    requiresServingSize?: boolean
   } | null {
     const { nutriments, product_name, brands, serving_size } = product
 
@@ -143,42 +144,117 @@ export class OpenFoodFactsClient {
       return null
     }
 
-    // Use provided serving size or default to 100g
-    const useServing = servingSize || serving_size
-    const use100g = !useServing
+    // Logic for serving size:
+    // 1. If user provides custom serving size, use 100g values and let them adjust
+    // 2. If product has REASONABLE serving size and serving values, use serving values
+    // 3. Otherwise, use 100g values as fallback
+    
+    const hasCustomServing = !!servingSize
+    
+    // Check what data is available
+    const serving_quantity = product.serving_quantity
+    const hasProductServing = !!nutriments['energy-kcal_serving']
+    const has100gData = !!nutriments['energy-kcal_100g']
+    
+    // If no serving data and no custom serving provided, we need user input
+    if (!hasProductServing && !hasCustomServing) {
+      return {
+        foodDetails: {
+          name: product_name,
+          description: `${product_name}${brands ? ` by ${brands}` : ''} (serving size needed)`,
+        },
+        macronutrients: {
+          calories: 0,
+          proteinGrams: 0,
+          carbohydrates: {
+            totalGrams: 0,
+            fiberGrams: 0,
+            sugarGrams: 0,
+          },
+          fat: {
+            totalGrams: 0,
+            saturatedGrams: 0,
+          },
+        },
+        requiresServingSize: true
+      }
+    }
+    
+    // Parse serving size for display purposes
+    let servingSizeNum = 0
+    if (serving_quantity) {
+      // Handle serving_quantity as string or number  
+      servingSizeNum = typeof serving_quantity === 'string' ? parseFloat(serving_quantity) : serving_quantity
+    } else if (serving_size) {
+      // Try to extract number from serving_size for display
+      const parenthesesMatch = serving_size.match(/\((\d+(?:\.\d+)?)\s*[a-z]*\)/)
+      if (parenthesesMatch) {
+        servingSizeNum = parseFloat(parenthesesMatch[1])
+      } else {
+        const numberMatch = serving_size.match(/(\d+(?:\.\d+)?)/)
+        if (numberMatch) {
+          servingSizeNum = parseFloat(numberMatch[1])
+        }
+      }
+    }
+    
+    let calories: number
+    let protein: number
+    let carbs: number
+    let fat: number
+    let fiber: number
+    let sugar: number
+    let saturatedFat: number
 
-    // Extract nutrition values (prefer serving if available, otherwise use 100g)
-    const calories = use100g 
-      ? nutriments['energy-kcal_100g'] || 0
-      : nutriments['energy-kcal_serving'] || nutriments['energy-kcal_100g'] || 0
-
-    const protein = use100g
-      ? nutriments['proteins_100g'] || 0
-      : nutriments['proteins_serving'] || nutriments['proteins_100g'] || 0
-
-    const carbs = use100g
-      ? nutriments['carbohydrates_100g'] || 0
-      : nutriments['carbohydrates_serving'] || nutriments['carbohydrates_100g'] || 0
-
-    const fat = use100g
-      ? nutriments['fat_100g'] || 0
-      : nutriments['fat_serving'] || nutriments['fat_100g'] || 0
-
-    const fiber = use100g
-      ? nutriments['fiber_100g'] || 0
-      : nutriments['fiber_serving'] || nutriments['fiber_100g'] || 0
-
-    const sugar = use100g
-      ? nutriments['sugars_100g'] || 0
-      : nutriments['sugars_serving'] || nutriments['sugars_100g'] || 0
-
-    const saturatedFat = use100g
-      ? nutriments['saturated-fat_100g'] || 0
-      : nutriments['saturated-fat_serving'] || nutriments['saturated-fat_100g'] || 0
+    if (hasCustomServing) {
+      // User provided custom serving size, calculate from 100g values
+      const customServingGrams = parseFloat(servingSize!) 
+      const ratio = customServingGrams / 100
+      
+      calories = (nutriments['energy-kcal_100g'] || 0) * ratio
+      protein = (nutriments['proteins_100g'] || 0) * ratio
+      carbs = (nutriments['carbohydrates_100g'] || 0) * ratio
+      fat = (nutriments['fat_100g'] || 0) * ratio
+      fiber = (nutriments['fiber_100g'] || 0) * ratio
+      sugar = (nutriments['sugars_100g'] || 0) * ratio
+      saturatedFat = (nutriments['saturated-fat_100g'] || 0) * ratio
+    } else if (hasProductServing) {
+      // Product has serving data, use it exactly as provided
+      calories = nutriments['energy-kcal_serving'] || 0
+      protein = nutriments['proteins_serving'] || 0
+      carbs = nutriments['carbohydrates_serving'] || 0
+      fat = nutriments['fat_serving'] || 0
+      fiber = nutriments['fiber_serving'] || 0
+      sugar = nutriments['sugars_serving'] || 0
+      saturatedFat = nutriments['saturated-fat_serving'] || 0
+    } else {
+      // This shouldn't happen since we check for this case above
+      calories = nutriments['energy-kcal_100g'] || 0
+      protein = nutriments['proteins_100g'] || 0
+      carbs = nutriments['carbohydrates_100g'] || 0
+      fat = nutriments['fat_100g'] || 0
+      fiber = nutriments['fiber_100g'] || 0
+      sugar = nutriments['sugars_100g'] || 0
+      saturatedFat = nutriments['saturated-fat_100g'] || 0
+    }
 
     // Build description
     const brandInfo = brands ? `by ${brands}` : ''
-    const servingInfo = useServing ? ` (per ${useServing})` : ' (per 100g)'
+    let servingInfo = ''
+    
+    if (hasCustomServing) {
+      servingInfo = ` (per ${servingSize}g)`
+    } else if (hasProductServing) {
+      // We have serving data, show what we're using
+      if (serving_size) {
+        servingInfo = ` (per ${serving_size})`
+      } else if (servingSizeNum) {
+        servingInfo = ` (per serving: ${servingSizeNum}g)`
+      } else {
+        servingInfo = ` (per serving)`
+      }
+    }
+    
     const description = `${product_name} ${brandInfo}${servingInfo}`.trim()
 
     return {

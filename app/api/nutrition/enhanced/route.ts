@@ -60,9 +60,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Strategy 3: AI fallback (last resort)
-    if (!nutritionData) {
-      console.log(`🤖 Falling back to AI for: ${foodName || searchTerms || barcode}`)
+    // Strategy 3: AI fallback (last resort) - only for text-based queries, not barcode-only
+    if (!nutritionData && (foodName || searchTerms)) {
+      const analysisInput = foodName || searchTerms
+      console.log(`🤖 Falling back to AI for: ${analysisInput}`)
       
       // Get configuration from environment variables
       const OPENAI_API_KEY = process.env.OPENAI_API_KEY
@@ -90,7 +91,6 @@ export async function POST(request: NextRequest) {
         })
 
         // Use the foodName or searchTerms for AI analysis
-        const analysisInput = foodName || searchTerms || `Product with barcode ${barcode}`
 
         // Create the response using OpenAI Responses API
         const response = await openai.responses.create({
@@ -157,10 +157,22 @@ export async function POST(request: NextRequest) {
     }
 
     if (!nutritionData) {
-      return NextResponse.json(
-        { error: "No nutrition data could be found for this item" },
-        { status: 404 }
-      )
+      // Provide specific error messages based on the input type
+      if (barcode && !foodName && !searchTerms) {
+        return NextResponse.json(
+          { 
+            error: "Barcode not found in database",
+            message: "This product isn't in our nutrition database. Please try searching by product name instead.",
+            barcode: barcode
+          },
+          { status: 404 }
+        )
+      } else {
+        return NextResponse.json(
+          { error: "No nutrition data could be found for this item" },
+          { status: 404 }
+        )
+      }
     }
 
     // Add metadata about the data source

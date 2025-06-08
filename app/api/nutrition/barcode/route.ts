@@ -54,6 +54,25 @@ export async function GET(request: NextRequest) {
       }, { status: 404 })
     }
 
+    // Check if serving size is required
+    if (nutritionData.requiresServingSize) {
+      return NextResponse.json({
+        error: "Serving size required",
+        productName: product.product_name,
+        barcode,
+        message: "This product doesn't have serving size data. Please specify how much you consumed.",
+        requiresServingSize: true,
+        availableData: {
+          per100g: {
+            calories: product.nutriments?.['energy-kcal_100g'] || null,
+            protein: product.nutriments?.['proteins_100g'] || null,
+            carbs: product.nutriments?.['carbohydrates_100g'] || null,
+            fat: product.nutriments?.['fat_100g'] || null
+          }
+        }
+      }, { status: 422 }) // 422 Unprocessable Entity - missing required input
+    }
+
     // Add metadata about the product
     const responseWithMeta = {
       ...nutritionData,

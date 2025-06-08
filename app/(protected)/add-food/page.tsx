@@ -372,15 +372,55 @@ export default function AddFoodPage() {
       if (!response.ok) {
         const errorData = await response.json()
         
-        // If barcode not found, fallback to enhanced search
+        // If barcode not found, show helpful message
         if (response.status === 404) {
           toast({
             title: "Product not found",
-            description: "Barcode not in database. Try searching by product name instead.",
+            description: errorData.message || "Barcode not in database. Try searching by product name instead.",
             variant: "destructive",
           })
-          setFoodName(`Barcode: ${barcode}`) // Pre-fill search field
+          // Don't pre-fill search field with barcode since it's not useful
           return
+        }
+        
+        // If serving size required, prompt user for serving size
+        if (response.status === 422 && errorData.requiresServingSize) {
+          const servingSize = prompt(
+            `Product found: ${errorData.productName}\n\nThis product doesn't have serving size data in the database.\nPlease enter the serving size in grams (e.g., "30" for 30g):`
+          )
+          
+          if (servingSize && !isNaN(parseFloat(servingSize))) {
+            // Retry with custom serving size using POST endpoint
+            const servingResponse = await fetch(`/api/nutrition/barcode`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                barcode: barcode,
+                servingSize: servingSize
+              })
+            })
+            
+            if (servingResponse.ok) {
+              const servingData = await servingResponse.json()
+              setNutritionData(servingData)
+              setFoodName(servingData.foodDetails.name)
+              toast({
+                title: "Product Found!",
+                description: `Found ${servingData.foodDetails.name} with ${servingSize}g serving`,
+              })
+              return
+            }
+          } else {
+            toast({
+              title: "Serving size needed",
+              description: "Please provide a valid serving size in grams to continue.",
+              variant: "destructive",
+            })
+            return
+          }
         }
         
         throw new Error(errorData.error || "Failed to lookup barcode")
