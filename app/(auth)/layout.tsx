@@ -16,11 +16,16 @@ export default function AuthLayout({
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.push("/dashboard")
+      router.replace("/dashboard")
     }
   }, [user, isLoading, router])
 
-  // Don't redirect while loading to avoid flashes
+  // Don't render auth pages if user is authenticated
+  if (!isLoading && user) {
+    return null
+  }
+
+  // Show loading while checking authentication
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
