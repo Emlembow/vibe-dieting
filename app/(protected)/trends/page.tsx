@@ -820,7 +820,7 @@ export default function TrendsPage() {
                 </div>
 
                 <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-                  <div className="bg-white dark:bg-slate-900 rounded-lg p-3 shadow-sm border">
+                  <div className="bg-background rounded-lg p-3 shadow-sm border">
                     <div className="flex items-center justify-center mb-2">
                       <div className="h-3 w-3 rounded-full bg-green-500 mr-1.5"></div>
                       <span className="text-sm font-medium">Protein</span>
@@ -828,7 +828,7 @@ export default function TrendsPage() {
                     <div className="text-2xl font-bold text-green-600">{summary.proteinPercentage}%</div>
                     <div className="text-xs text-muted-foreground">{summary.avgProtein}g avg.</div>
                   </div>
-                  <div className="bg-white dark:bg-slate-900 rounded-lg p-3 shadow-sm border">
+                  <div className="bg-background rounded-lg p-3 shadow-sm border">
                     <div className="flex items-center justify-center mb-2">
                       <div className="h-3 w-3 rounded-full bg-purple-500 mr-1.5"></div>
                       <span className="text-sm font-medium">Carbs</span>
@@ -836,7 +836,7 @@ export default function TrendsPage() {
                     <div className="text-2xl font-bold text-purple-600">{summary.carbsPercentage}%</div>
                     <div className="text-xs text-muted-foreground">{summary.avgCarbs}g avg.</div>
                   </div>
-                  <div className="bg-white dark:bg-slate-900 rounded-lg p-3 shadow-sm border">
+                  <div className="bg-background rounded-lg p-3 shadow-sm border">
                     <div className="flex items-center justify-center mb-2">
                       <div className="h-3 w-3 rounded-full bg-yellow-500 mr-1.5"></div>
                       <span className="text-sm font-medium">Fat</span>
@@ -899,7 +899,7 @@ export default function TrendsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="bg-white dark:bg-slate-900 rounded-lg p-3 shadow-sm border">
+                  <div className="bg-background rounded-lg p-3 shadow-sm border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-green-500 mr-1.5"></div>
@@ -917,7 +917,7 @@ export default function TrendsPage() {
                     </div>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 rounded-lg p-3 shadow-sm border">
+                  <div className="bg-background rounded-lg p-3 shadow-sm border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-purple-500 mr-1.5"></div>
@@ -935,7 +935,7 @@ export default function TrendsPage() {
                     </div>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 rounded-lg p-3 shadow-sm border">
+                  <div className="bg-background rounded-lg p-3 shadow-sm border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <div className="h-3 w-3 rounded-full bg-yellow-500 mr-1.5"></div>
