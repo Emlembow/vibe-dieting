@@ -88,12 +88,7 @@ npm test -- --testPathPattern="dashboard"
 
 ## Test Coverage
 
-The project maintains high test coverage standards:
-
-- **Branches**: 70% minimum
-- **Functions**: 70% minimum  
-- **Lines**: 70% minimum
-- **Statements**: 70% minimum
+The project applies test coverage based on component criticality and business value. Critical features and components that handle user data, authentication, or core business logic receive comprehensive test coverage, while utility components and UI elements are tested based on their complexity and risk profile.
 
 ### Viewing Coverage
 ```bash
